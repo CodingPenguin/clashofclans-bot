@@ -1,27 +1,25 @@
 
-import discord, requests, json, os
+from time import time
+import discord, requests, json
+import os
+import matplotlib.pyplot as plt
+from datetime import date
 
-from discord.ext.commands.core import check
 from discord.errors import HTTPException
 from discord.ext import commands
 from dotenv import load_dotenv
-from requests import request
-
-load_dotenv()
 
 intents = discord.Intents.default()
 intents.members = True
 
+load_dotenv()
 client = commands.Bot(command_prefix='coc ', intents=intents)
 API_KEY = os.getenv("API_KEY")
 
 #clan_tag = "#2PGJUGPR"
 
 # HELPERS:
-
-# BEGIN COC STATS HELPERS
 def get_player_stats(tag):
-    
     url = f'https://api.clashofclans.com/v1/players/{tag}'
     headers = {
         'Accept': '*/*',
@@ -31,20 +29,25 @@ def get_player_stats(tag):
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
-    except HTTPException as e:
+    except:
         return "There was an error with the request. Please try again later."
     
-    data = response.json()
-    return(set_stats_embed(data["name"], data["trophies"], data["clan"]["name"]))
+    res = response.json()
+    return res
+
+# BEGIN COC STATS HELPERS
+def get_stats_embed(tag):
+    data = get_player_stats(tag)
+    return(set_stats_embed(data["name"], data["clan"]["name"], data["clan"]["tag"], data["trophies"], data["warStars"]))
         
 
-def set_stats_embed(name, trophies, clan):
+def set_stats_embed(name, clan, clan_tag, trophies, war_stars):
     embed_var = discord.Embed(title=f"{name}'s Stats", color=0xD40C00)
+    embed_var.add_field(name="Clan ⚔️", value=f"{clan} ({clan_tag})", inline=False)
     embed_var.add_field(name="Trophies 🏆", value=f"{trophies}", inline=False)
-    embed_var.add_field(name="Clan ⚔️", value=f"{clan}", inline=False)
+    embed_var.add_field(name="War Stars ⭐", value=f"{war_stars}", inline=False)
     
     return(embed_var)
-
 
 
 # BEGIN COC VERIFY HELPERS
@@ -60,15 +63,28 @@ def write_json(author_id, tag):
     try:
         with open('data.json', "rt") as d:
             data = json.load(d)
-    except IOError:
+    except:
         data = {}
         
-    data[author_id] = f'{tag}'
+    data[author_id] = {
+        'player_tag': f'{tag}'
+    }
 
     with open("data.json", "wt") as fp:
-        json.dump(data, fp)
+        json.dump(data, fp, indent=4)
 
 # END COC VERIFY HELPERS
+# BEGIN COC GRAPH HELPERS
+def set_graph_embed(author_name):
+    embed_var = discord.Embed(
+        title=f"**{author_name}** Trophy Graph",
+        description="All-time Graph",
+        color=0x000000
+    )
+    embed_var.set_image(url="attachment://image.png")
+    return embed_var
+
+    
     
 @client.event
 async def on_ready():
@@ -85,67 +101,104 @@ async def on_message(message):
     
 @client.command()
 async def stats(ctx, tag="0"):
-    with open('data.json', "rt") as d:
-            data = json.load(d)
-    if str(ctx.author.id) in data:
-        await ctx.send(embed=get_player_stats(data[str(ctx.author.id)]))
-    elif tag == 0:
-        await ctx.send("Please enter a tag")
-    else:
+    try:
+        with open('data.json', "rt") as d:
+                data = json.load(d)
+        if str(ctx.author.id) in data:
+            await ctx.send(embed=get_stats_embed(data[str(ctx.author.id)]["player_tag"]))
+        else:
+            await ctx.send("Please enter a tag or run `coc verify` to use `coc stats` without entering a player tag. ")
+    except:
+        if tag == "0":
+            await ctx.send("Please enter a tag or run `coc verify` to use `coc stats` without entering a player tag. ")
+            return
         tag = tag.replace('#', "%23")
-        await ctx.send(embed=get_player_stats(tag))
+        await ctx.send(embed=get_stats_embed(tag))
 
 @client.command()
 async def verify(ctx):
-    with open('data.json', "rt") as d:
-            data = json.load(d)
-    if str(ctx.author.id) in data:
-        await ctx.send("You are already verified!")
-        return
-    def check(msg):
-        return msg.author == ctx.author and str(msg.channel.type) == "private"
-    
-    await ctx.author.send("Enter your player tag followed by a space and then your player token!\nFor example: `#PLAYERTAG apitoken`\nYour API token can be found in-game. Gear Icon -> More Settings -> Tap 'Show' to see API token")
-    user_data = await client.wait_for("message", check=check)
-    user_tag = user_data.content.split(' ')[0].replace('#', '%23')
-    user_token = user_data.content.split(' ')[1]
-    
-    url = f'https://api.clashofclans.com/v1/players/{user_tag}/verifytoken'
-    token_data = {
-        'token': f'{user_token}'
-    }
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'authorization': f'Bearer {API_KEY}',
-    }
     try:
-        response = requests.post(
-            url,
-            json=token_data,
-            headers=headers
-        )
-        response.raise_for_status()
-    except HTTPException as e:
-        print('error: ', e)
+        with open('data.json', "rt") as d:
+            data = json.load(d)
+            if str(ctx.author.id) in data:
+                await ctx.send("You are already verified!")
+                return
+    except:
+        def check(msg):
+            return msg.author == ctx.author and str(msg.channel.type) == "private"
         
+        await ctx.author.send("Enter your player tag followed by a space and then your player token!\nFor example: `#PLAYERTAG apitoken`\nYour API token can be found in-game. Gear Icon -> More Settings -> Tap 'Show' to see API token")
+        user_data = await client.wait_for("message", check=check)
+        user_tag = user_data.content.split(' ')[0].replace('#', '%23')
+        print("user_tag: ", user_tag)
+        user_token = user_data.content.split(' ')[1]
+        print("user_token: ", user_token)
         
-    data = response.json()
-    if 'status' in data:
-        if data['status'] == 'ok':
-            guild = client.get_guild(ctx.guild.id) # Get Guild w/ Guild ID
-            role = discord.utils.get(guild.roles, name="verified player") # Get Role w/ Role ID
-            member = guild.get_member(ctx.author.id) # Get member by author Id
-            await member.add_roles(role)
+        url = f'https://api.clashofclans.com/v1/players/{user_tag}/verifytoken'
+        token_data = {
+            'token': f'{user_token}'
+        }
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'authorization': f'Bearer {API_KEY}',
+        }
+        try:
+            response = requests.post(
+                url,
+                json=token_data,
+                headers=headers
+            )
+            response.raise_for_status()
+        except HTTPException as e:
+            print('error: ', e)
             
-            write_json(ctx.author.id, user_tag)
             
-            embed_var = set_verify_embed(ctx.author.name)
-            await ctx.send(embed=embed_var)
-            await ctx.author.send("Verified!") # send verified in dm
-        else:
-            await ctx.author.send("Please try again by saying `coc verify` Check for typos.")
+        res = response.json()
+        if 'status' in res:
+            if res['status'] == 'ok':
+                guild = client.get_guild(ctx.guild.id) # Get Guild w/ Guild ID
+                role = discord.utils.get(guild.roles, name="verified player") # Get Role w/ Role ID
+                member = guild.get_member(ctx.author.id) # Get member by author Id
+                await member.add_roles(role)
+                
+                write_json(ctx.author.id, user_tag)
+                
+                embed_var = set_verify_embed(ctx.author.name)
+                await ctx.send(embed=embed_var)
+                await ctx.author.send("Verified!") # send verified in dm
+            else:
+                print(res)
+                await ctx.author.send("Please try again by saying `coc verify` Check for typos.")
+@client.command()
+async def graph(ctx):
+    with open('data.json', "rt") as d:
+        data = json.load(d)
+    if str(ctx.author.id) not in data:
+        await ctx.send("Please verify by using `coc verify` to use `coc graph`")
+        return
+    
+    author_id = str(ctx.author.id)
+    if 'trophy_data' not in data[author_id]:
+        data[author_id]['trophy_data'] = {}
         
+    today = str(date.today().strftime('%b %d %y'))
+    tag = data[author_id]['player_tag']
+    player_stats = get_player_stats(tag)
+    current_trophy_count = str(player_stats['trophies'])
+    data[author_id]['trophy_data'][today] = current_trophy_count
+    
+    dates = list(data[author_id]['trophy_data'].keys())
+    trophy_values = list(map(int, list(data[author_id]['trophy_data'].values())))
+    plt.plot(dates, trophy_values, marker='o', color='black')
+    plt.text(dates[-1], trophy_values[-1], f'   {trophy_values[-1]}')
+    with open("data.json", "wt") as fp:
+        json.dump(data, fp, indent=4)
+    plt.savefig('graph.png')
+    plt.clf()
+    
+    file = discord.File("./graph.png", filename="image.png")
+    await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
     
 
 client.run(os.getenv('TOKEN'))
