@@ -36,10 +36,11 @@ client = commands.Bot(command_prefix='coc ', intents=intents)
 def get_player_stats(tag):
     url = f'https://api.clashofclans.com/v1/players/{tag}'
     headers = {
-        'Accept': '*/*',
+        'Accept': 'application/json',
         'authorization': f'Bearer {API_KEY}',
         'Content-Type': 'application/json'
     }
+    print("headers: ", headers)
     try:
         response = requests.get(url, headers=headers, proxies=proxies)
         response.raise_for_status()
