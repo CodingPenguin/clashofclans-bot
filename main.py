@@ -12,13 +12,17 @@ from dotenv import load_dotenv
 intents = discord.Intents.default()
 intents.members = True
 
-if 'API_KEY' not in os.environ or 'TOKEN' not in os.environ:
+if 'API_KEY' not in os.environ or 'TOKEN' not in os.environ: #local
     load_dotenv()
     API_KEY = os.getenv("API_KEY")
     TOKEN = os.getenv("TOKEN")
-else:
+    proxies = {}
+else: # heroku
     API_KEY = os.environ["API_KEY"]
     TOKEN = os.environ["TOKEN"]
+    proxies = {
+        "http": os.environ['QUOTAGUARDSTATIC_URL']
+    }
     
 client = commands.Bot(command_prefix='coc ', intents=intents)
 
@@ -33,7 +37,10 @@ def get_player_stats(tag):
         'Content-Type': 'application/json'
     }
     try:
-        response = requests.get(url, headers=headers)
+        if 'http' in proxies:
+            response = requests.get(url, headers=headers, proxies=proxies)
+        else:
+            response = requests.get(url, headers=headers)
         response.raise_for_status()
     except:
         return "There was an error with the request. Please try again later."
@@ -171,11 +178,20 @@ async def verify(ctx):
             'authorization': f'Bearer {API_KEY}',
         }
         try:
-            response = requests.post(
-                url,
-                json=token_data,
-                headers=headers
-            )
+            if 'http' in proxies:
+                response = requests.post(
+                    url,
+                    json=token_data,
+                    headers=headers,
+                    proxies=proxies
+                )
+                response.raise_for_status()
+            else:
+                response = requests.post(
+                    url,
+                    json=token_data,
+                    headers=headers,
+                )
             response.raise_for_status()
         except HTTPException as e:
             print('error: ', e)
@@ -210,9 +226,9 @@ async def graph(ctx):
         data[author_id]['trophy_data'] = {}
         
     today = str(date.today().strftime('%b %d %y'))
-    # if today in data[author_id]['trophy_data']:
-    #     await ctx.send('You have already graphed your trophies for today. Please come back tomorrow.')
-    #     return
+    if today in data[author_id]['trophy_data']:
+        await ctx.send('You have already graphed your trophies for today. Please come back tomorrow.')
+        return
     
     tag = data[author_id]['player_tag']
     player_stats = get_player_stats(tag)
