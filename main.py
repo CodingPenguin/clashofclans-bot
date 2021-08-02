@@ -24,7 +24,8 @@ else: # heroku
     API_KEY = os.environ["API_KEY"]
     TOKEN = os.environ["TOKEN"]
     proxies = {
-        "http": str(os.environ['QUOTAGUARDSTATIC_URL'])
+        "http": os.environ['QUOTAGUARDSTATIC_URL'],
+        "https": os.environ['QUOTAGUARDSTATIC_URL']
     }
     print(TOKEN)
     print(proxies)
