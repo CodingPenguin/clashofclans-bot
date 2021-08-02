@@ -44,6 +44,7 @@ def get_player_stats(tag):
         return "There was an error with the request. Please try again later."
     
     res = response.json()
+    print(res)
     return res
 
 # BEGIN COC STATS HELPERS
