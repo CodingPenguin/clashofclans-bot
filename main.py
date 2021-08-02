@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 intents = discord.Intents.default()
 intents.members = True
 
-if 'API_KEY' not in os.environ or 'TOKEN' not in os.environ: #local
+if 'API_KEY' not in os.environ or 'TOKEN' not in os.environ: # local
     load_dotenv()
     API_KEY = os.getenv("API_KEY")
     TOKEN = os.getenv("TOKEN")
@@ -25,8 +25,6 @@ else: # heroku
     }
     
 client = commands.Bot(command_prefix='coc ', intents=intents)
-
-#clan_tag = "#2PGJUGPR"
 
 # HELPERS:
 def get_player_stats(tag):
@@ -139,11 +137,11 @@ async def on_message(message):
 async def stats(ctx, tag="0"):
     try:
         with open('data.json', "rt") as d:
-                data = json.load(d)
+            data = json.load(d)
         if str(ctx.author.id) in data:
             await ctx.send(embed=get_stats_embed(data[str(ctx.author.id)]["player_tag"]))
-        else:
-            await ctx.send("Please enter a tag or run `coc verify` to use `coc stats` without entering a player tag. ")
+            return
+        await ctx.send("Please enter a tag or run `coc verify` to use `coc stats` without entering a player tag. ")
     except:
         if tag == "0":
             await ctx.send("Please enter a tag or run `coc verify` to use `coc stats` without entering a player tag. ")
