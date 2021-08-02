@@ -26,6 +26,7 @@ else: # heroku
     proxies = {
         "http": os.environ['QUOTAGUARDSTATIC_URL']
     }
+    print(TOKEN)
     
 client = commands.Bot(command_prefix='coc ', intents=intents)
 
