@@ -44,12 +44,13 @@ def get_player_stats(tag):
         return "There was an error with the request. Please try again later."
     
     res = response.json()
-    print(res)
+    print('res: ', res)
     return res
 
 # BEGIN COC STATS HELPERS
 def get_stats_embed(tag):
     data = get_player_stats(tag)
+    print('data: ', data)
     return(set_stats_embed(data["name"], data["clan"]["name"], data["clan"]["tag"], data["trophies"], data["warStars"]))
         
 
