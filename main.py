@@ -75,6 +75,30 @@ def write_json(author_id, tag):
 
 # END COC VERIFY HELPERS
 # BEGIN COC GRAPH HELPERS
+def plot_trophy_graph(data, author_id):
+    dates = list(data[author_id]['trophy_data'].keys())
+    trophy_values = list(map(int, list(data[author_id]['trophy_data'].values())))
+    
+    plt.figure(facecolor="#2F3136")
+    plt.plot(dates, trophy_values, marker='o', color='white') 
+    plt.tight_layout()
+    plt.text(dates[-1], trophy_values[-1], f'{trophy_values[-1]}   ', horizontalalignment='right', color="white")
+    
+    ax = plt.gca()
+    ax.set_facecolor(('#2F3136'))
+    ax.spines['bottom'].set_color('white')
+    ax.spines['top'].set_color('#2F3136') 
+    ax.spines['right'].set_color('#2F3136')
+    ax.spines['left'].set_color('white')
+    ax.tick_params(axis='x', colors='white')
+    ax.tick_params(axis='y', colors='white')
+    
+    with open("data.json", "wt") as fp:
+        json.dump(data, fp, indent=4)
+        
+    plt.savefig('graph.png')
+    plt.clf()
+
 def set_graph_embed(author_name):
     embed_var = discord.Embed(
         title=f"**{author_name}** Trophy Graph",
@@ -83,8 +107,7 @@ def set_graph_embed(author_name):
     )
     embed_var.set_image(url="attachment://image.png")
     return embed_var
-
-    
+# END COC GRAPH HELPERS
     
 @client.event
 async def on_ready():
@@ -183,19 +206,16 @@ async def graph(ctx):
         data[author_id]['trophy_data'] = {}
         
     today = str(date.today().strftime('%b %d %y'))
+    # if today in data[author_id]['trophy_data']:
+    #     await ctx.send('You have already graphed your trophies for today. Please come back tomorrow.')
+    #     return
+    
     tag = data[author_id]['player_tag']
     player_stats = get_player_stats(tag)
     current_trophy_count = str(player_stats['trophies'])
     data[author_id]['trophy_data'][today] = current_trophy_count
     
-    dates = list(data[author_id]['trophy_data'].keys())
-    trophy_values = list(map(int, list(data[author_id]['trophy_data'].values())))
-    plt.plot(dates, trophy_values, marker='o', color='black')
-    plt.text(dates[-1], trophy_values[-1], f'   {trophy_values[-1]}')
-    with open("data.json", "wt") as fp:
-        json.dump(data, fp, indent=4)
-    plt.savefig('graph.png')
-    plt.clf()
+    plot_trophy_graph(data, author_id)
     
     file = discord.File("./graph.png", filename="image.png")
     await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
