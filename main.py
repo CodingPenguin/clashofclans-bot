@@ -16,7 +16,10 @@ if 'API_KEY' not in os.environ or 'TOKEN' not in os.environ: # local
     load_dotenv()
     API_KEY = os.getenv("API_KEY")
     TOKEN = os.getenv("TOKEN")
-    proxies = {}
+    proxies = {
+        "http": os.getenv("QUOTAGUARDSTATIC_URL")
+    }
+    print(proxies)
 else: # heroku
     API_KEY = os.environ["API_KEY"]
     TOKEN = os.environ["TOKEN"]
@@ -38,7 +41,8 @@ def get_player_stats(tag):
         if 'http' in proxies:
             response = requests.get(url, headers=headers, proxies=proxies)
         else:
-           response = requests.get(url, headers=headers)
+            #response = requests.get(url, headers=headers)
+            print("your mom")
         response.raise_for_status()
     except:
         return "There was an error with the request. Please try again later."
