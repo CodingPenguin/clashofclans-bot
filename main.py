@@ -24,9 +24,11 @@ else: # heroku
     API_KEY = os.environ["API_KEY"]
     TOKEN = os.environ["TOKEN"]
     proxies = {
-        "http": os.environ['QUOTAGUARDSTATIC_URL']
+        "http": str(os.environ['QUOTAGUARDSTATIC_URL'])
     }
     print(TOKEN)
+    print(proxies)
+    print(API_KEY)
     
 client = commands.Bot(command_prefix='coc ', intents=intents)
 
