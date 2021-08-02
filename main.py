@@ -17,7 +17,8 @@ if 'API_KEY' not in os.environ or 'TOKEN' not in os.environ: # local
     API_KEY = os.getenv("API_KEY")
     TOKEN = os.getenv("TOKEN")
     proxies = {
-        "http": os.getenv("QUOTAGUARDSTATIC_URL")
+        "http": os.getenv("QUOTAGUARDSTATIC_URL"),
+        "https": os.getenv("QUOTAGUARDSTATIC_URL")
     }
     
 else: # heroku
@@ -27,9 +28,6 @@ else: # heroku
         "http": os.environ['QUOTAGUARDSTATIC_URL'],
         "https": os.environ['QUOTAGUARDSTATIC_URL']
     }
-    print(TOKEN)
-    print(proxies)
-    print(API_KEY)
     
 client = commands.Bot(command_prefix='coc ', intents=intents)
 
@@ -41,7 +39,6 @@ def get_player_stats(tag):
         'authorization': f'Bearer {API_KEY}',
         'Content-Type': 'application/json'
     }
-    print("headers: ", headers)
     try:
         response = requests.get(url, headers=headers, proxies=proxies)
         response.raise_for_status()
@@ -210,7 +207,6 @@ async def verify(ctx):
             await ctx.send(embed=embed_var)
             await ctx.author.send("Verified!") # send verified in dm
         else:
-            print(res)
             await ctx.author.send("Please try again by saying `coc verify` in the server. Check for typos.")
 @client.command()
 async def graph(ctx):
