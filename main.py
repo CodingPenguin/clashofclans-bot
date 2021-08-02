@@ -136,82 +136,78 @@ async def on_message(message):
     
 @client.command()
 async def stats(ctx, tag="0"):
-    try:
-        with open('data.json', "rt") as d:
-            data = json.load(d)
+    with open('data.json', "rt") as d:
+        data = json.load(d)
         if str(ctx.author.id) in data:
             await ctx.send(embed=get_stats_embed(data[str(ctx.author.id)]["player_tag"]))
             return
+    if tag == "0":
         await ctx.send("Please enter a tag or run `coc verify` to use `coc stats` without entering a player tag. ")
-    except:
-        if tag == "0":
-            await ctx.send("Please enter a tag or run `coc verify` to use `coc stats` without entering a player tag. ")
-            return
-        tag = tag.replace('#', "%23")
-        await ctx.send(embed=get_stats_embed(tag))
+        return
+    tag = tag.replace('#', "%23")
+    await ctx.send(embed=get_stats_embed(tag))
 
 @client.command()
 async def verify(ctx):
+    with open('data.json', "rt") as d:
+        data = json.load(d)
+        if str(ctx.author.id) in data:
+            await ctx.send("You are already verified!")
+            return
+
+    def check(msg):
+        return msg.author == ctx.author and str(msg.channel.type) == "private"
+    
+    await ctx.author.send("Enter your player tag followed by a space and then your player token!\nFor example: `#PLAYERTAG apitoken`\nYour API token can be found in-game. Gear Icon -> More Settings -> Tap 'Show' to see API token")
+    user_data = await client.wait_for("message", check=check)
+    user_tag = user_data.content.split(' ')[0].replace('#', '%23')
+    user_token = user_data.content.split(' ')[1]
+    
+    url = f'https://api.clashofclans.com/v1/players/{user_tag}/verifytoken'
+    token_data = {
+        'token': f'{user_token}'
+    }
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'authorization': f'Bearer {API_KEY}',
+    }
     try:
-        with open('data.json', "rt") as d:
-            data = json.load(d)
-            if str(ctx.author.id) in data:
-                await ctx.send("You are already verified!")
-                return
-    except:
-        def check(msg):
-            return msg.author == ctx.author and str(msg.channel.type) == "private"
-        
-        await ctx.author.send("Enter your player tag followed by a space and then your player token!\nFor example: `#PLAYERTAG apitoken`\nYour API token can be found in-game. Gear Icon -> More Settings -> Tap 'Show' to see API token")
-        user_data = await client.wait_for("message", check=check)
-        user_tag = user_data.content.split(' ')[0].replace('#', '%23')
-        user_token = user_data.content.split(' ')[1]
-        
-        url = f'https://api.clashofclans.com/v1/players/{user_tag}/verifytoken'
-        token_data = {
-            'token': f'{user_token}'
-        }
-        headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'authorization': f'Bearer {API_KEY}',
-        }
-        try:
-            if 'http' in proxies:
-                response = requests.post(
-                    url,
-                    json=token_data,
-                    headers=headers,
-                    proxies=proxies
-                )
-                response.raise_for_status()
-            else:
-                response = requests.post(
-                    url,
-                    json=token_data,
-                    headers=headers,
-                )
+        if 'http' in proxies:
+            response = requests.post(
+                url,
+                json=token_data,
+                headers=headers,
+                proxies=proxies
+            )
             response.raise_for_status()
-        except HTTPException as e:
-            print('error: ', e)
+        else:
+            response = requests.post(
+                url,
+                json=token_data,
+                headers=headers,
+            )
+        response.raise_for_status()
+    except HTTPException as e:
+        print('error: ', e)
+        
+        
+    res = response.json()
+    if 'status' in res:
+        if res['status'] == 'ok':
+            guild = client.get_guild(ctx.guild.id) # Get Guild w/ Guild ID
+            role = discord.utils.get(guild.roles, name="verified player") # Get Role w/ Role ID
+            member = guild.get_member(ctx.author.id) # Get member by author Id
+            await member.add_roles(role)
             
+            write_json(ctx.author.id, user_tag)
             
-        res = response.json()
-        if 'status' in res:
-            if res['status'] == 'ok':
-                guild = client.get_guild(ctx.guild.id) # Get Guild w/ Guild ID
-                role = discord.utils.get(guild.roles, name="verified player") # Get Role w/ Role ID
-                member = guild.get_member(ctx.author.id) # Get member by author Id
-                await member.add_roles(role)
-                
-                write_json(ctx.author.id, user_tag)
-                
-                embed_var = set_verify_embed(ctx.author.name)
-                await ctx.send(embed=embed_var)
-                await ctx.author.send("Verified!") # send verified in dm
-            else:
-                print(res)
-                await ctx.author.send("Please try again by saying `coc verify` Check for typos.")
+            embed_var = set_verify_embed(ctx.author.name)
+            await ctx.send(embed=embed_var)
+            await ctx.author.send("Verified!") # send verified in dm
+        else:
+            print(res)
+            await ctx.author.send("Please try again by saying `coc verify` in the server. Check for typos.")
 @client.command()
 async def graph(ctx):
     with open('data.json', "rt") as d:
