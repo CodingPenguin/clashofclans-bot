@@ -12,9 +12,15 @@ from dotenv import load_dotenv
 intents = discord.Intents.default()
 intents.members = True
 
-load_dotenv()
+if 'API_KEY' not in os.environ or 'TOKEN' not in os.environ:
+    load_dotenv()
+    API_KEY = os.getenv("API_KEY")
+    TOKEN = os.getenv("TOKEN")
+else:
+    API_KEY = os.environ["API_KEY"]
+    TOKEN = os.environ["TOKEN"]
+    
 client = commands.Bot(command_prefix='coc ', intents=intents)
-API_KEY = os.getenv("API_KEY")
 
 #clan_tag = "#2PGJUGPR"
 
@@ -153,9 +159,7 @@ async def verify(ctx):
         await ctx.author.send("Enter your player tag followed by a space and then your player token!\nFor example: `#PLAYERTAG apitoken`\nYour API token can be found in-game. Gear Icon -> More Settings -> Tap 'Show' to see API token")
         user_data = await client.wait_for("message", check=check)
         user_tag = user_data.content.split(' ')[0].replace('#', '%23')
-        print("user_tag: ", user_tag)
         user_token = user_data.content.split(' ')[1]
-        print("user_token: ", user_token)
         
         url = f'https://api.clashofclans.com/v1/players/{user_tag}/verifytoken'
         token_data = {
@@ -221,6 +225,6 @@ async def graph(ctx):
     await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
     
 
-client.run(os.getenv('TOKEN'))
+client.run(TOKEN)
 
 
