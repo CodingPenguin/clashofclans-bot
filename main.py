@@ -230,7 +230,6 @@ async def graph(ctx):
     )
     print(user_data)
     print(user_data['trophy_data'])
-    #data[author_id]['trophy_data'][today] = current_trophy_count
     
     plot_trophy_graph(user_data['trophy_data'])
     
