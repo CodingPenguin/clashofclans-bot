@@ -1,6 +1,6 @@
 
 from time import time
-import discord, requests, json
+import discord, requests, json, pymongo
 import os
 import matplotlib.pyplot as plt
 from datetime import date
@@ -21,13 +21,17 @@ if 'API_KEY' not in os.environ or 'TOKEN' not in os.environ: # local
         "https": os.getenv("QUOTAGUARDSTATIC_URL")
     }
     
-else: # heroku
+else: # heroku prod
     API_KEY = os.environ["API_KEY"]
     TOKEN = os.environ["TOKEN"]
     proxies = {
         "http": os.environ['QUOTAGUARDSTATIC_URL'],
         "https": os.environ['QUOTAGUARDSTATIC_URL']
     }
+    mongo_client = pymongo.MongoClient("mongodb+srv://danmaruchiAdmin:kkZ!4vCFY$QXk$N5@cluster0.hbcfw.mongodb.net/cocstatsbot?retryWrites=true&w=majority")
+    db = mongo_client.coc
+    col = db.users
+    
     
 client = commands.Bot(command_prefix='coc ', intents=intents)
 
@@ -72,25 +76,22 @@ def set_verify_embed(author_name):
     )
     return embed_var
 
-def write_json(author_id, tag):
-    try:
-        with open('data.json', "rt") as d:
-            data = json.load(d)
-    except:
-        data = {}
-        
-    data[author_id] = {
-        'player_tag': f'{tag}'
+def write_to_db(author_id, tag):
+    new_user_data = {
+        "_id": str(author_id),
+        'player_tag': str(tag),
+        'trophy_data': {
+            
+        }
     }
+    col.insert_one(new_user_data)
 
-    with open("data.json", "wt") as fp:
-        json.dump(data, fp, indent=4)
 
 # END COC VERIFY HELPERS
 # BEGIN COC GRAPH HELPERS
-def plot_trophy_graph(data, author_id):
-    dates = list(data[author_id]['trophy_data'].keys())
-    trophy_values = list(map(int, list(data[author_id]['trophy_data'].values())))
+def plot_trophy_graph(data):
+    dates = list(data.keys())
+    trophy_values = list(map(int, list(data.values())))
     
     plt.figure(facecolor="#2F3136")
     plt.plot(dates, trophy_values, marker='o', color='white') 
@@ -106,8 +107,8 @@ def plot_trophy_graph(data, author_id):
     ax.tick_params(axis='x', colors='white')
     ax.tick_params(axis='y', colors='white')
     
-    with open("data.json", "wt") as fp:
-        json.dump(data, fp, indent=4)
+    # with open("data.json", "wt") as fp:
+    #     json.dump(data, fp, indent=4)
         
     plt.savefig('graph.png')
     plt.clf()
@@ -118,7 +119,7 @@ def set_graph_embed(author_name):
         description="All-time Graph",
         color=0x000000
     )
-    embed_var.set_image(url="attachment://image.png")
+    embed_var.set_image(url="attachment://graph.png")
     return embed_var
 # END COC GRAPH HELPERS
     
@@ -139,9 +140,14 @@ async def on_message(message):
 async def stats(ctx, tag="0"):
     with open('data.json', "rt") as d:
         data = json.load(d)
-        if str(ctx.author.id) in data:
-            await ctx.send(embed=get_stats_embed(data[str(ctx.author.id)]["player_tag"]))
-            return
+    check_verified = col.count_documents({'_id': str(ctx.author.id)}, limit=1)
+    user_tag = col.find_one({
+        '_id': str(ctx.author.id)
+    })['player_tag']
+    
+    if check_verified:
+        await ctx.send(embed=get_stats_embed(user_tag))
+        return
     if tag == "0":
         await ctx.send("Please enter a tag or run `coc verify` to use `coc stats` without entering a player tag. ")
         return
@@ -150,11 +156,10 @@ async def stats(ctx, tag="0"):
 
 @client.command()
 async def verify(ctx):
-    with open('data.json', "rt") as d:
-        data = json.load(d)
-        if str(ctx.author.id) in data:
-            await ctx.send("You are already verified!")
-            return
+    check_verified = col.count_documents({'_id': str(ctx.author.id)}, limit=1)
+    if check_verified:
+        await ctx.send("You are already verified!")
+        return
 
     def check(msg):
         return msg.author == ctx.author and str(msg.channel.type) == "private"
@@ -174,20 +179,12 @@ async def verify(ctx):
         'authorization': f'Bearer {API_KEY}',
     }
     try:
-        if 'http' in proxies:
-            response = requests.post(
-                url,
-                json=token_data,
-                headers=headers,
-                proxies=proxies
-            )
-            response.raise_for_status()
-        else:
-            response = requests.post(
-                url,
-                json=token_data,
-                headers=headers,
-            )
+        response = requests.post(
+            url,
+            json=token_data,
+            headers=headers,
+            proxies=proxies
+        )
         response.raise_for_status()
     except HTTPException as e:
         print('error: ', e)
@@ -201,7 +198,7 @@ async def verify(ctx):
             member = guild.get_member(ctx.author.id) # Get member by author Id
             await member.add_roles(role)
             
-            write_json(ctx.author.id, user_tag)
+            write_to_db(ctx.author.id, user_tag)
             
             embed_var = set_verify_embed(ctx.author.name)
             await ctx.send(embed=embed_var)
@@ -210,29 +207,42 @@ async def verify(ctx):
             await ctx.author.send("Please try again by saying `coc verify` in the server. Check for typos.")
 @client.command()
 async def graph(ctx):
-    with open('data.json', "rt") as d:
-        data = json.load(d)
-    if str(ctx.author.id) not in data:
+    check_verified = col.count_documents({'_id': str(ctx.author.id)}, limit=1)
+    if check_verified == 0:
         await ctx.send("Please verify by using `coc verify` to use `coc graph`")
         return
     
     author_id = str(ctx.author.id)
-    if 'trophy_data' not in data[author_id]:
-        data[author_id]['trophy_data'] = {}
-        
     today = str(date.today().strftime('%b %d %y'))
-    if today in data[author_id]['trophy_data']:
-        await ctx.send('You have already graphed your trophies for today. Please come back tomorrow.')
+    
+    user_data = col.find_one({'_id': author_id})
+    print(user_data)
+    
+    
+    if today in user_data['trophy_data']: # graphs "today" graph and does not make a new graph. Just uses the info alr in database for "today"
+        plot_trophy_graph(user_data['trophy_data'])
         return
     
-    tag = data[author_id]['player_tag']
+    tag = str(user_data['player_tag'])
     player_stats = get_player_stats(tag)
     current_trophy_count = str(player_stats['trophies'])
-    data[author_id]['trophy_data'][today] = current_trophy_count
+    col.update_one(
+        {
+            '_id': author_id
+        }, 
+        {
+            '$set' : {
+                f"trophy_data.{today}": f"{current_trophy_count}"
+            }
+        }
+    )
+    print(user_data)
+    print(user_data['trophy_data'])
+    #data[author_id]['trophy_data'][today] = current_trophy_count
     
-    plot_trophy_graph(data, author_id)
+    plot_trophy_graph(user_data['trophy_data'])
     
-    file = discord.File("./graph.png", filename="image.png")
+    file = discord.File("./graph.png", filename="graph.png")
     await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
     
 
