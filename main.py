@@ -209,6 +209,8 @@ async def graph(ctx):
     
     if today in user_data['trophy_data']: # graphs "today" graph and does not make a new graph. Just uses the info alr in database for "today"
         plot_trophy_graph(user_data['trophy_data'])
+        file = discord.File("./graph.png", filename="graph.png")
+        await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
         return
     
     tag = str(user_data['player_tag'])
