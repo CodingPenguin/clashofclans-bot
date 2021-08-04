@@ -14,10 +14,6 @@ intents = discord.Intents.default()
 intents.members = True
     
 # heroku prod and local
-hostname = socket.gethostname()
-local_ip = socket.gethostbyname(hostname)
-
-print(local_ip)
 
 API_KEY = os.environ["API_KEY"]
 TOKEN = os.environ["TOKEN"]
