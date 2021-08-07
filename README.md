@@ -13,20 +13,17 @@ When ran, the bot will DM the user and prompt their in-game player tag and API t
 ### coc stats
 
 When ran without verification, the bot requires a player tag argument to be entered after the command. <br />
-Ex: 
 ```
 coc stats #GY2GJLCP
 ```
 When ran, and the user has already been verified, no additional arguments are required.
 
-Ex2:
 ![Picture of coc stats](https://user-images.githubusercontent.com/11476519/128583213-a3e8eeb6-d76f-49bd-b142-e89e2a2d2825.png)
 
 ### coc graph
 
 This command requires user verification before use. The user's saved trophy data will be plotted (via matplotlib) on a line graph. New data can only be saved once daily, but the graph can be seen as many times as prompted. 
 
-Ex:
 ![Picture of coc graph](https://user-images.githubusercontent.com/11476519/128583210-8a603e61-7512-4c85-afd1-5c429ba740b2.png)
 
 ## Contribute

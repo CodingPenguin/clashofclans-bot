@@ -1,14 +1,12 @@
 
 from time import time
-import discord, requests, json, pymongo
+import discord, requests, pymongo
 import os
 import matplotlib.pyplot as plt
 from datetime import date
 
 from discord.errors import HTTPException
 from discord.ext import commands
-from dotenv import load_dotenv
-import socket
 
 intents = discord.Intents.default()
 intents.members = True
