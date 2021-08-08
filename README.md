@@ -1,6 +1,6 @@
-# Clash of Clans Discord Bot (CoC Stats)
+# Clash of Clans Discord Bot (CoC Bot)
 
-This bot is used to fetch in-game player data by using the official [Clash of Clans API](https://developer.clashofclans.com/#/documentation). CoC Stats is still under testing and some features have yet to be implemented. Suggestions are encouraged!
+This bot is used to fetch in-game player data by using the official [Clash of Clans API](https://developer.clashofclans.com/#/documentation). CoC Bot is still under testing and some features have yet to be implemented. Suggestions are encouraged!
 
 ## Commands
 
@@ -26,6 +26,7 @@ This command requires user verification before use. The user's saved trophy data
 
 ![Picture of coc graph](https://user-images.githubusercontent.com/11476519/128583210-8a603e61-7512-4c85-afd1-5c429ba740b2.png)
 
-## Contribute
+## Contribute & Test
 
-Join the testing server! [Discord Invite](https://discord.gg/6MXVXxK7pb)
+Want to add the bot to your server? Join the testing server and ask me!  [Discord Invite](https://discord.gg/6MXVXxK7pb)
+
