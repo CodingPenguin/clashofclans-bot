@@ -131,7 +131,7 @@ async def stats(ctx, tag="0"):
         '_id': str(ctx.author.id)
     })['player_tag']
     
-    if check_verified:
+    if check_verified and tag == "0":
         await ctx.send(embed=get_stats_embed(user_tag))
         return
     if tag == "0":
@@ -231,7 +231,14 @@ async def graph(ctx):
     
     file = discord.File("./graph.png", filename="graph.png")
     await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
+
+# async def help(ctx):
+#     msg = """
+#     ```
     
+#     ```
+#     """
+#     await ctx.send()
 
 client.run(TOKEN)
 
