@@ -24,7 +24,7 @@ db = mongo_client.coc
 col = db.users
     
     
-client = commands.Bot(command_prefix='coc ', intents=intents)
+client = commands.Bot(command_prefix='coc ', intents=intents, help_command=None)
 
 # HELPERS:
 def get_player_stats(tag):
@@ -77,7 +77,6 @@ def write_to_db(author_id, tag):
     }
     col.insert_one(new_user_data)
 
-
 # END COC VERIFY HELPERS
 # BEGIN COC GRAPH HELPERS
 def plot_trophy_graph(data):
@@ -123,7 +122,19 @@ async def on_message(message):
     if message.content == "coc":
         await message.channel.send(f"Hello {message.author.name}!")
     await client.process_commands(message)
-    
+
+@client.command()
+async def help(ctx):
+    embed_var  = discord.Embed(
+        title="Commands!", 
+        description="Every command starts with the prefix \"coc\" followed by a space and the keyword.",
+        color=0x000000
+    )
+    embed_var.add_field(name="`stats`", value="Retrieve's player's stats. Ex: coc stats [player_tag]. UNLESS you have already verified using coc verify, in which case: coc stats.", inline=False)
+    embed_var.add_field(name="`verify`", value="Verifies and authenticates you by matching up your Discord ID to your CoC player tag. Ex: coc verify. Follow instructions in DMs.", inline=False)
+    embed_var.add_field(name="`graph`", value="Only available once you have verified using coc verify. Plots your trophy count daily. Has to be run manually each day. Ex: coc graph.", inline=False)
+    embed_var.add_field(name="`help`", value="Sends this command list",inline=False)
+    await ctx.send(embed=embed_var)    
 @client.command()
 async def stats(ctx, tag="0"):
     check_verified = col.count_documents({'_id': str(ctx.author.id)}, limit=1)
@@ -202,43 +213,29 @@ async def graph(ctx):
     today = str(date.today().strftime('%b %d %y'))
     
     user_data = col.find_one({'_id': author_id})
-    print(user_data)
-    
     
     if today in user_data['trophy_data']: # graphs "today" graph and does not make a new graph. Just uses the info alr in database for "today"
         plot_trophy_graph(user_data['trophy_data'])
         file = discord.File("./graph.png", filename="graph.png")
         await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
-        return
-    
-    tag = str(user_data['player_tag'])
-    player_stats = get_player_stats(tag)
-    current_trophy_count = str(player_stats['trophies'])
-    col.update_one(
-        {
-            '_id': author_id
-        }, 
-        {
-            '$set' : {
-                f"trophy_data.{today}": f"{current_trophy_count}"
+    else:
+        tag = str(user_data['player_tag'])
+        player_stats = get_player_stats(tag)
+        current_trophy_count = str(player_stats['trophies'])
+        col.update_one(
+            {       
+                '_id': author_id
+            }, 
+            {
+                '$set' : {
+                    f"trophy_data.{today}": f"{current_trophy_count}"
+                }
             }
-        }
-    )
-    print(user_data)
-    print(user_data['trophy_data'])
-    
-    plot_trophy_graph(user_data['trophy_data'])
-    
-    file = discord.File("./graph.png", filename="graph.png")
-    await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
-
-# async def help(ctx):
-#     msg = """
-#     ```
-    
-#     ```
-#     """
-#     await ctx.send()
+        )
+        user_data = col.find_one({'_id': author_id})
+        plot_trophy_graph(user_data['trophy_data'])
+        file = discord.File("./graph.png", filename="graph.png")
+        await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
 
 client.run(TOKEN)
 
