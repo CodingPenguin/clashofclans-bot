@@ -97,6 +97,10 @@ def plot_trophy_graph(data):
     ax.tick_params(axis='x', colors='white')
     ax.tick_params(axis='y', colors='white')
         
+    labels = [item.get_text() for item in ax.get_xticklabels()]
+    new_labels = ['']*len(labels)
+    new_labels[0], new_labels[len(new_labels)-1] = labels[0], labels[len(labels)-1]
+    ax.set_xticklabels(new_labels)
     plt.savefig('graph.png')
     plt.clf()
 
@@ -218,24 +222,26 @@ async def graph(ctx):
         plot_trophy_graph(user_data['trophy_data'])
         file = discord.File("./graph.png", filename="graph.png")
         await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
-    else:
-        tag = str(user_data['player_tag'])
-        player_stats = get_player_stats(tag)
-        current_trophy_count = str(player_stats['trophies'])
-        col.update_one(
-            {       
-                '_id': author_id
-            }, 
-            {
-                '$set' : {
-                    f"trophy_data.{today}": f"{current_trophy_count}"
-                }
+        return
+    
+    tag = str(user_data['player_tag'])
+    player_stats = get_player_stats(tag)
+    current_trophy_count = str(player_stats['trophies'])
+    col.update_one(
+        {       
+            '_id': author_id
+        }, 
+        {
+            '$set' : {
+                f"trophy_data.{today}": f"{current_trophy_count}"
             }
-        )
-        user_data = col.find_one({'_id': author_id})
-        plot_trophy_graph(user_data['trophy_data'])
-        file = discord.File("./graph.png", filename="graph.png")
-        await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
+        }
+    )
+    user_data = col.find_one({'_id': author_id})
+    plot_trophy_graph(user_data['trophy_data'])
+    file = discord.File("./graph.png", filename="graph.png")
+    await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
+    
 
 client.run(TOKEN)
 
