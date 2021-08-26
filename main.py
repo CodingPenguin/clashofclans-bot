@@ -1,7 +1,7 @@
 
 from time import time
 import discord, requests, pymongo
-import os
+import os, math
 import matplotlib.pyplot as plt
 from datetime import date
 
@@ -57,7 +57,6 @@ def set_stats_embed(name, clan, clan_tag, trophies, war_stars):
     
     return(embed_var)
 
-
 # BEGIN COC VERIFY HELPERS
 def set_verify_embed(author_name):
     embed_var = discord.Embed(
@@ -65,7 +64,7 @@ def set_verify_embed(author_name):
         description=f"**{author_name}** has been verified!",
         color=0x32C12C
     )
-    return embed_var
+    return(embed_var)
 
 def write_to_db(author_id, tag):
     new_user_data = {
@@ -113,7 +112,43 @@ def set_graph_embed(author_name):
     embed_var.set_image(url="attachment://graph.png")
     return embed_var
 # END COC GRAPH HELPERS
-    
+# BEGIN COC ZAP HELPERS
+async def set_zap_embed(airdef, zap):
+    airdef_dict = {
+        "1": "800",
+        "2": "850",
+        "3": "900",
+        "4": "950",
+        "5": "1000",
+        "6": "1050",
+        "7": "1100",
+        "8": "1210",
+        "9": "1300",
+        "10": "1400",
+        "11": "1500",
+        "12": "1600"  
+    }
+    zap_dict = {
+        "1": "150",
+        "2": "180",
+        "3": "210",
+        "4": "240",
+        "5": "270",
+        "6": "320",
+        "7": "400",
+        "8": "480",
+        "9": "560"  
+    }
+    airdef_hp = int(airdef_dict[(airdef)])
+    zap_ap = int(zap_dict[(zap)])
+    amount_of_zaps = math.ceil(airdef_hp/zap_ap)
+    embed_var = discord.Embed(
+        title=f"How to destroy a level {airdef} Air Defense with level {zap} Lightning Spells:",
+        description=f"⚡ Use {amount_of_zaps} of your level {zap} Lightning Spells ⚡",
+        color=0x00A5F9
+    )
+    return(embed_var)
+# END COC ZAP HELPERS
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -137,6 +172,7 @@ async def help(ctx):
     embed_var.add_field(name="`stats`", value="Retrieve's player's stats. Ex: coc stats [player_tag]. UNLESS you have already verified using coc verify, in which case: coc stats.", inline=False)
     embed_var.add_field(name="`verify`", value="Verifies and authenticates you by matching up your Discord ID to your CoC player tag. Ex: coc verify. Follow instructions in DMs.", inline=False)
     embed_var.add_field(name="`graph`", value="Only available once you have verified using coc verify. Plots your trophy count daily. Has to be run manually each day. Ex: coc graph.", inline=False)
+    embed_var.add_field(name="`zap`", value="Tells the player how many lightning spells are required to destroy an air defense. This command requires two parameters: the air defense level and your lightning spell level. Ex: coc zap <air defense level> <your lightning spell level>.", inline=False)
     embed_var.add_field(name="`help`", value="Sends this command list",inline=False)
     await ctx.send(embed=embed_var)    
 @client.command()
@@ -150,7 +186,7 @@ async def stats(ctx, tag="0"):
         await ctx.send(embed=get_stats_embed(user_tag))
         return
     if tag == "0":
-        await ctx.send("Please enter a tag or run `coc verify` to use `coc stats` without entering a player tag. ")
+        await ctx.send("Please enter a tag or run `coc verify` to use `coc stats` without entering a player tag.")
         return
     tag = tag.replace('#', "%23")
     await ctx.send(embed=get_stats_embed(tag))
@@ -241,8 +277,15 @@ async def graph(ctx):
     plot_trophy_graph(user_data['trophy_data'])
     file = discord.File("./graph.png", filename="graph.png")
     await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
-    
+@client.command()
+async def zap(ctx, airdef="0", zap="0"):
+    if (int(airdef) < 1 or int(airdef) > 12) or (int(zap) < 1 or int(zap) > 9):
+        await ctx.send("Please enter valid air defense and/or lightning spell levels. Ex: coc zap <air defense level> <lightning spell level>")
+        return
+    print(airdef)
+    print(zap)
+    embed_var = await set_zap_embed(airdef, zap)
+    await ctx.send(embed=embed_var)
 
 client.run(TOKEN)
-
 
