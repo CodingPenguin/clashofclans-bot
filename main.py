@@ -149,10 +149,55 @@ async def set_zap_embed(airdef, zap):
     )
     return(embed_var)
 # END COC ZAP HELPERS
+# BEGIN COC ZAPQUAKE HELPERS
+async def set_zapquake_embed(airdef, zap, quake):
+    airdef_dict = {
+        "1": "800",
+        "2": "850",
+        "3": "900",
+        "4": "950",
+        "5": "1000",
+        "6": "1050",
+        "7": "1100",
+        "8": "1210",
+        "9": "1300",
+        "10": "1400",
+        "11": "1500",
+        "12": "1600"  
+    }
+    zap_dict = {
+        "1": "150",
+        "2": "180",
+        "3": "210",
+        "4": "240",
+        "5": "270",
+        "6": "320",
+        "7": "400",
+        "8": "480",
+        "9": "560"  
+    }
+    quake_dict = {
+        "1": .145,
+        "2": .17,
+        "3": .21,
+        "4": .25,
+        "5": .29
+    }
+    airdef_hp = int(airdef_dict[(airdef)])
+    zap_ap = int(zap_dict[(zap)])
+    quake_ap = quake_dict[(quake)]
+    airdef_hp *= (1-quake_ap)
+    amount_of_zaps = math.ceil(airdef_hp/zap_ap)
+    embed_var = discord.Embed(
+        title=f"How to destroy a level {airdef} Air Defense with level {zap} Lightning Spells and level {quake} Earthquake spells:",
+        description=f"💨 Use 1 of your level {quake} Earthquake Spells FIRST! 💨\n⚡ Then use {amount_of_zaps} of your level {zap} Lightning Spells ⚡",
+        color=0x00A5F9
+    )
+    return(embed_var)
+# END COC ZAPQUAKE HELPERS
 @client.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
-    
+    print('We have logged in as {0.user}'.format(client))    
 @client.event
 async def on_message(message):   
     if message.author == client.user:
@@ -169,11 +214,12 @@ async def help(ctx):
         description="Every command starts with the prefix \"coc\" followed by a space and the keyword.",
         color=0x000000
     )
-    embed_var.add_field(name="`stats`", value="Retrieve's player's stats. Ex: coc stats [player_tag]. UNLESS you have already verified using coc verify, in which case: coc stats.", inline=False)
+    embed_var.add_field(name="`stats`", value="Retrieve's player's stats.\nEx: coc stats [player_tag].\nUNLESS you have already verified using coc verify, in which case:\ncoc stats.", inline=False)
     embed_var.add_field(name="`verify`", value="Verifies and authenticates you by matching up your Discord ID to your CoC player tag. Ex: coc verify. Follow instructions in DMs.", inline=False)
-    embed_var.add_field(name="`graph`", value="Only available once you have verified using coc verify. Plots your trophy count daily. Has to be run manually each day. Ex: coc graph.", inline=False)
-    embed_var.add_field(name="`zap`", value="Tells the player how many lightning spells are required to destroy an air defense. This command requires two parameters: the air defense level and your lightning spell level. Ex: coc zap <air defense level> <your lightning spell level>.", inline=False)
-    embed_var.add_field(name="`help`", value="Sends this command list",inline=False)
+    embed_var.add_field(name="`graph`", value="Only available once you have verified using coc verify. Plots your trophy count daily. Has to be run manually each day.\nEx: coc graph.", inline=False)
+    embed_var.add_field(name="`zap`", value="Tells the player how many lightning spells are required to destroy an air defense. This command requires two parameters: the air defense level and your lightning spell level.\nEx: coc zap [air defense level] [lightning spell level].", inline=False)
+    embed_var.add_field(name="`zapquake`", value="Tells the player how many lightning spells and earthquake spells are required to destroy an air defense. This command requires three parameters: the air defense level and a lightning spell level, and an earthquake spell level.\nEx: coc zap [air defense level] [lightning spell level] [earthquake spell level].", inline=False)
+    embed_var.add_field(name="`help`", value="Sends this command list.",inline=False)
     await ctx.send(embed=embed_var)    
 @client.command()
 async def stats(ctx, tag="0"):
@@ -190,7 +236,6 @@ async def stats(ctx, tag="0"):
         return
     tag = tag.replace('#', "%23")
     await ctx.send(embed=get_stats_embed(tag))
-
 @client.command()
 async def verify(ctx):
     check_verified = col.count_documents({'_id': str(ctx.author.id)}, limit=1)
@@ -280,11 +325,16 @@ async def graph(ctx):
 @client.command()
 async def zap(ctx, airdef="0", zap="0"):
     if (int(airdef) < 1 or int(airdef) > 12) or (int(zap) < 1 or int(zap) > 9):
-        await ctx.send("Please enter valid air defense and/or lightning spell levels. Ex: coc zap <air defense level> <lightning spell level>")
+        await ctx.send("Please enter valid air defense and/or lightning spell levels. Ex: coc zap [air defense level] [lightning spell level]")
         return
-    print(airdef)
-    print(zap)
     embed_var = await set_zap_embed(airdef, zap)
+    await ctx.send(embed=embed_var)
+@client.command()
+async def zapquake(ctx, airdef="0", zap="0", quake="0"):
+    if (int(airdef) < 1 or int(airdef) > 12) or (int(zap) < 1 or int(zap) > 9) or (int(quake) < 1 or int(quake) > 5):
+        await ctx.send("Please enter valid air defense and/or lightning spell levels and/or earthquake spell levels. Ex: coc zap [air defense level] [lightning spell level] [earthquake spell level]")
+        return
+    embed_var = await set_zapquake_embed(airdef, zap, quake)
     await ctx.send(embed=embed_var)
 
 client.run(TOKEN)
