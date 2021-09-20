@@ -246,7 +246,7 @@ async def verify(ctx):
     def check(msg):
         return msg.author == ctx.author and str(msg.channel.type) == "private"
     
-    await ctx.author.send("Enter your player tag followed by a space and then your player token!\nFor example: `#PLAYERTAG apitoken`\nYour API token can be found in-game. Gear Icon -> More Settings -> Tap 'Show' to see API token")
+    await ctx.author.send("Enter your in-game player tag followed by a space and then your player token!\nFor example: `#IN-GAME-PLAYERTAG apitoken`\nYour API token can be found in-game. Gear Icon -> More Settings -> Tap 'Show' to see API token")
     user_data = await client.wait_for("message", check=check)
     user_tag = user_data.content.split(' ')[0].replace('#', '%23')
     user_token = user_data.content.split(' ')[1]
@@ -275,13 +275,7 @@ async def verify(ctx):
     res = response.json()
     if 'status' in res:
         if res['status'] == 'ok':
-            guild = client.get_guild(ctx.guild.id) # Get Guild w/ Guild ID
-            role = discord.utils.get(guild.roles, name="verified player") # Get Role w/ Role ID
-            member = guild.get_member(ctx.author.id) # Get member by author Id
-            await member.add_roles(role)
-            
             write_to_db(ctx.author.id, user_tag)
-            
             embed_var = set_verify_embed(ctx.author.name)
             await ctx.send(embed=embed_var)
             await ctx.author.send("Verified!") # send verified in dm
