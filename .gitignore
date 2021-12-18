@@ -1,3 +1,5 @@
+env/*
 .env
 ideas.txt
 graph.png
+__pycache__
