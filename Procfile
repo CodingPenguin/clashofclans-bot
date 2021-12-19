@@ -1,1 +1,1 @@
-worker: heroku local
+worker: python3 main.py
