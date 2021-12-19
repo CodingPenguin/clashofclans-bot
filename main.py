@@ -2,6 +2,7 @@ from env import API_KEY, PROXIES, TOKEN, MONGO_SRV_URL
 import discord, requests
 from pymongo import MongoClient
 from datetime import date
+from loguru import logger
 
 from discord.errors import HTTPException
 from discord.ext import commands
@@ -20,10 +21,10 @@ db = mongo_client.coc
 col = db.users
 
 client = commands.Bot(command_prefix='coc ', intents=intents, help_command=None)
-print(col)
+
 @client.event
 async def on_ready():
-    print(f'We have logged in as {client.user}')
+    logger.info(f'We have logged in as {client.user}')
     
     
 @client.event
@@ -32,6 +33,7 @@ async def on_message(message):
         return
 
     if message.content == "coc":
+        logger.info('coc')
         await message.channel.send(f"Hello {message.author.name}!")
         
     await client.process_commands(message)
@@ -39,6 +41,8 @@ async def on_message(message):
 
 @client.command()
 async def help(ctx):
+    logger.info('help')
+    
     embed_var  = discord.Embed(
         title="Commands!", 
         description="Every command starts with the prefix \"coc\" followed by a space and the keyword.",
@@ -57,12 +61,16 @@ async def help(ctx):
      
 @client.command()
 async def stats(ctx, tag: str=None):
-    check_verified = col.count_documents({'_id': str(ctx.author.id)}, limit=1)
-    user_tag = col.find_one({
-        '_id': str(ctx.author.id)
-    })['player_tag']
+    logger.info('stats')
     
-    if check_verified and tag is None:
+    verified = False
+    author_id = str(ctx.author.id)
+    selector = {'_id': author_id}
+    if (user := col.find_one(selector)) is not None:
+        user_tag = user['player_tag']
+        verified = True
+    
+    if verified and tag is None:
         await ctx.send(embed=get_stats_embed(user_tag))
         return
     if tag is None:
@@ -74,8 +82,11 @@ async def stats(ctx, tag: str=None):
     
 @client.command()
 async def verify(ctx):
-    check_verified = col.count_documents({'_id': str(ctx.author.id)}, limit=1)
-    if check_verified:
+    logger.info('verify')
+    
+    author_id = str(ctx.author.id)
+    selector = {'_id': author_id}
+    if col.find_one(selector) is not None:
         await ctx.send("You are already verified!")
         return
 
@@ -111,7 +122,7 @@ async def verify(ctx):
     res = response.json()
     if 'status' in res:
         if res['status'] == 'ok':
-            write_to_db(ctx.author.id, user_tag) # async 1
+            write_to_db(author_id, user_tag) # async 1
             embed_var = set_verify_embed(ctx.author.name) # async 2
             await ctx.send(embed=embed_var)
             await ctx.author.send("Verified!") # send verified in dm
@@ -121,15 +132,15 @@ async def verify(ctx):
             
 @client.command()
 async def graph(ctx):
-    check_verified = col.count_documents({'_id': str(ctx.author.id)}, limit=1)
-    if check_verified == 0:
-        await ctx.send("Please verify by using `coc verify` to use `coc graph`")
-        return
+    logger.info('graph')
     
     author_id = str(ctx.author.id)
-    today = str(date.today().strftime('%b %d %y'))
+    selector = {'_id': author_id}
+    if (user_data := col.find_one(selector)) is None:
+        await ctx.send("Please verify by using `coc verify` to use `coc graph`")        
+        return
     
-    user_data = col.find_one({'_id': author_id})
+    today = str(date.today().strftime('%b %d %y'))
     
     if today in user_data['trophy_data']: # graphs "today" graph and does not make a new graph. Just uses the info alr in database for "today"
         plot_trophy_graph(user_data['trophy_data'])
@@ -155,9 +166,55 @@ async def graph(ctx):
     file = discord.File("./graph.png", filename="graph.png")
     await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
     
+
+@client.command()
+async def hero(ctx):
+    logger.info('hero')
+    
+    author_id = str(ctx.author.id)
+    selector = {'_id': author_id}
+    if (user_data := col.find_one(selector)) is None:
+        await ctx.send("Please verify by using `coc verify` to use `coc hero`")        
+        return
+    
+    player_stats = get_player_stats(user_data['player_tag'])
+    
+    if 'townHallLevel' not in player_stats:
+        await ctx.send('There was an error with the Clash of Clans API. Please try again later.')
+    if 'heroes' not in player_stats:
+        await ctx.send('There was an error with the Clash of Clans API. Please try again later.')
+        
+    th_level = player_stats['townHallLevel']
+    heroes = player_stats['heroes']
+    
+    embed_var = discord.Embed(
+      title=f"{player_stats['name']}'s Heroes",
+      color=0x000000
+    )
+    
+    for hero in heroes:
+        if hero['name'] == 'Barbarian King':
+            hero_name = f"{hero['name']} 👑"
+        elif hero['name'] == 'Archer Queen':
+            hero_name = f"{hero['name']} 🏹"
+        elif hero['name'] == 'Grand Warden':
+            hero_name = f"{hero['name']} 🪄"
+        elif hero['name'] == 'Battle Machine':
+            hero_name = f"{hero['name']} 🔨"
+        else:
+            hero_name = hero['name']
+        embed_var.add_field(
+            name=hero_name,
+            value=f"Level {hero['level']}",
+            inline=False
+        )    
+    await ctx.send(embed=embed_var)
+    
     
 @client.command()
 async def zap(ctx, airdef="0", zap="0"):
+    logger.info('zap')
+    
     try:
         airdef = int(airdef)
         zap = int(zap)
@@ -174,6 +231,7 @@ async def zap(ctx, airdef="0", zap="0"):
     
 @client.command()
 async def zapquake(ctx, airdef="0", zap="0", quake="0"):
+    logger.info('zapquake')
     try:
         airdef = int(airdef)
         zap = int(zap)
@@ -187,6 +245,7 @@ async def zapquake(ctx, airdef="0", zap="0", quake="0"):
     
     embed_var = await set_zapquake_embed(airdef, zap, quake)
     await ctx.send(embed=embed_var)
+
 
 if __name__ == '__main__':
     client.run(TOKEN)

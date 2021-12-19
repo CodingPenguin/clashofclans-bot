@@ -1,4 +1,4 @@
-import os, requests, discord
+import requests, discord
 from env import API_KEY, PROXIES
 
 def get_player_stats(tag: str):
@@ -25,6 +25,8 @@ def get_stats_embed(tag: str) -> discord.Embed:
       'player_name': data['name'],
       'clan_name': data['clan']['name'],
       'clan_tag': data['clan']['tag'],
+      'donations': data['donations'],
+      'donations_received': data['donationsReceived'],
       'trophies': data['trophies'],
       'war_stars': data['warStars']
     }
@@ -40,6 +42,11 @@ def set_stats_embed(embed_data: dict[str]) -> discord.Embed:
     embed_var.add_field(
         name="Clan ⚔️",
         value=f"{embed_data['clan_name']} ({embed_data['clan_tag']})",
+        inline=False
+    )
+    embed_var.add_field(
+        name="Donation Ratio 🤲",
+        value=f"{round(embed_data['donations']/embed_data['donations_received'], 3)} ({embed_data['donations']}/{embed_data['donations_received']})",
         inline=False
     )
     embed_var.add_field(
