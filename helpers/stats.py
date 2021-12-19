@@ -26,6 +26,7 @@ def get_player_stats(tag: str):
 
 def get_stats_embed(tag: str) -> discord.Embed:
     data = get_player_stats(tag)
+    logger.debug(PROXIES)
     logger.debug(f'data: {data}')
     if data is None:
         embed_var = discord.Embed(
