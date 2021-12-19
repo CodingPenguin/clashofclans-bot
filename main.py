@@ -53,8 +53,8 @@ async def help(ctx):
     embed_var.add_field(name="`graph`", value="Plots your trophy count daily.\nHas to be run manually each day, and can only retrieve new trophy counts each day.\nOnly available once you have verified using coc verify.\nEx: coc graph", inline=False)
     embed_var.add_field(name="`hero`", value="Lists your hero levels.\nIn the future, this should display how far you are from max hero levels at your Town Hall level.\nOnly available once you have verified using coc verify.\nEx: coc hero")
     embed_var.add_field(name="`zap`", value="Tells the player how many lightning spells are required to destroy an air defense.\nThis command requires two parameters: the air defense level and your lightning spell level.\nEx: coc zap [air defense level] [lightning spell level]", inline=False)
-    embed_var.add_field(name="`zapquake`", value="Tells the player how many lightning spells and earthquake spells are required to destroy an air defense.\nThis command requires three parameters: the air defense level and a lightning spell level, and an earthquake spell level.\nEx: coc zap [air defense level] [lightning spell level] [earthquake spell level]", inline=False)
-    embed_var.add_field(name="`help`", value="Sends this command list. Contact me in Discord @ danmaruchi#8034", inline=False)
+    embed_var.add_field(name="`zapquake`", value="Tells the player how many lightning and earthquake spells are required to destroy an air defense.\nThis command requires three parameters: the air defense level and a lightning spell level, and an earthquake spell level.\nEx: coc zapquake [air defense level] [lightning spell level] [earthquake spell level]", inline=False)
+    embed_var.add_field(name="`help`", value="Sends this command list.\nFor further inquiries, contact me in Discord @ danmaruchi#8034.\nIf you are satisfied with this bot, leave a review on [Top.gg](https://top.gg/bot/870085172136149002)! ", inline=False)
     
     await ctx.send(embed=embed_var)   
     
