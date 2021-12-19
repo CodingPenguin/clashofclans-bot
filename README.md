@@ -30,7 +30,7 @@ This command requires user verification before use. The user's saved trophy data
 
 This command fetches the hero levels of each hero the player has. In the future, this should include how far the player is from maxing out their heroes for their Town Hall level. Requires verification.
 
-<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cochero.png' width="500" height="500" />
+<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cochero.png' width="500" height="600" />
 
 ### coc zap
 
