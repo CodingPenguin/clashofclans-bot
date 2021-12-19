@@ -52,7 +52,7 @@ coc zapquake [air defense level] [lightning spell level] [earthquake spell level
 
 Sends the command list!
 
-## Contribute & Test
+## Contribute & Support
 
-Want to add the bot to your server? Use this [link](https://discord.com/api/oauth2/authorize?client_id=870085172136149002&permissions=8&scope=bot)! Need more support? Join the support [server](https://discord.gg/6MXVXxK7pb) and ask me directly!
+Want to add the bot to your server? Use this [link](https://discord.com/api/oauth2/authorize?client_id=870085172136149002&permissions=8&scope=bot)! <br />Need more support? Join the support [server](https://discord.gg/6MXVXxK7pb) and ask me directly! <br />Want to support? [Buy me a coffee!](https://www.buymeacoffee.com/danmaruchi)
 
