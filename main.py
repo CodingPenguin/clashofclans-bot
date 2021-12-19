@@ -33,7 +33,7 @@ async def on_message(message):
 
     if message.content == "coc":
         logger.info('coc')
-        await message.channel.send(f"Hello {message.author.name}! Did you know I'm on {len(client.servers)} Discord servers? I'm more popular than you!")
+        await message.channel.send(f"Hello {message.author.name}! Did you know I'm on {len(client.guilds)} Discord servers? I'm more popular than you!")
         
     await client.process_commands(message)
 
