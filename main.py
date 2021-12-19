@@ -21,6 +21,8 @@ db = mongo_client.coc
 col = db.users
 
 client = commands.Bot(command_prefix='coc ', intents=intents, help_command=None)
+client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(client.guilds)} servers"))
+
 
 @client.event
 async def on_ready():
