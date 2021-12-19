@@ -12,10 +12,12 @@ def get_player_stats(tag: str):
     try:
         response = requests.get(url, headers=headers, proxies=PROXIES)
         response.raise_for_status()
+        print(response.status_code)
     except:
         return "There was an error with the request. Please try again later."
     
     res = response.json()
+    print(res)
     return res
 
 
