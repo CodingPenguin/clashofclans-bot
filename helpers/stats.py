@@ -31,6 +31,7 @@ def get_stats_embed(tag: str) -> discord.Embed:
     if data is None:
         embed_var = discord.Embed(
             title='Request Error',
+            description="There was an error with the request. Please try again later.",
             color=0xFF0000
         )
         return embed_var
@@ -51,7 +52,6 @@ def get_stats_embed(tag: str) -> discord.Embed:
 def set_stats_embed(embed_data: dict[str]) -> discord.Embed:
     embed_var = discord.Embed(
       title=f"{embed_data['player_name']}'s Stats",
-      description="There was an error with the request. Please try again later.",
       color=0xD40C00
     )
     embed_var.add_field(
