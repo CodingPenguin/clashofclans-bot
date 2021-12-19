@@ -24,8 +24,7 @@ client = commands.Bot(command_prefix='coc ', intents=intents, help_command=None)
 
 @client.event
 async def on_ready():
-    logger.info(f'We have logged in as {client.user}')
-    
+    logger.info(f'We have logged in as {client.user}')    
     
 @client.event
 async def on_message(message):   
@@ -34,7 +33,7 @@ async def on_message(message):
 
     if message.content == "coc":
         logger.info('coc')
-        await message.channel.send(f"Hello {message.author.name}!")
+        await message.channel.send(f"Hello {message.author.name}! Did you know I'm on {len(client.servers)} Discord servers? I'm more popular than you!")
         
     await client.process_commands(message)
 
