@@ -49,12 +49,13 @@ async def help(ctx):
         color=0x000000
     )
     
-    embed_var.add_field(name="`stats`", value="Retrieve's player's stats.\nEx: coc stats [player_tag].\nUNLESS you have already verified using coc verify, in which case:\ncoc stats.", inline=False)
-    embed_var.add_field(name="`verify`", value="Verifies and authenticates you by matching up your Discord ID to your CoC player tag. Ex: coc verify. Follow instructions in DMs.", inline=False)
-    embed_var.add_field(name="`graph`", value="Only available once you have verified using coc verify. Plots your trophy count daily. Has to be run manually each day.\nEx: coc graph.", inline=False)
-    embed_var.add_field(name="`zap`", value="Tells the player how many lightning spells are required to destroy an air defense. This command requires two parameters: the air defense level and your lightning spell level.\nEx: coc zap [air defense level] [lightning spell level].", inline=False)
-    embed_var.add_field(name="`zapquake`", value="Tells the player how many lightning spells and earthquake spells are required to destroy an air defense. This command requires three parameters: the air defense level and a lightning spell level, and an earthquake spell level.\nEx: coc zap [air defense level] [lightning spell level] [earthquake spell level].", inline=False)
-    embed_var.add_field(name="`help`", value="Sends this command list.",inline=False)
+    embed_var.add_field(name="`stats`", value="Retrieve's player's stats.\nEx: coc stats [player_tag]\nUNLESS you have already verified using coc verify, in which case:\ncoc stats.", inline=False)
+    embed_var.add_field(name="`verify`", value="Verifies and authenticates you by matching up your Discord ID to your CoC player tag.\nFollow instructions in DMs.\nEx: coc verify", inline=False)
+    embed_var.add_field(name="`graph`", value="Plots your trophy count daily.\nHas to be run manually each day, and can only retrieve new trophy counts each day.\nOnly available once you have verified using coc verify.\nEx: coc graph", inline=False)
+    embed_var.add_field(name="`hero`", value="Lists your hero levels.\nIn the future, this should display how far you are from max hero levels at your Town Hall level.\nOnly available once you have verified using coc verify.\nEx: coc hero")
+    embed_var.add_field(name="`zap`", value="Tells the player how many lightning spells are required to destroy an air defense.\nThis command requires two parameters: the air defense level and your lightning spell level.\nEx: coc zap [air defense level] [lightning spell level]", inline=False)
+    embed_var.add_field(name="`zapquake`", value="Tells the player how many lightning spells and earthquake spells are required to destroy an air defense.\nThis command requires three parameters: the air defense level and a lightning spell level, and an earthquake spell level.\nEx: coc zap [air defense level] [lightning spell level] [earthquake spell level]", inline=False)
+    embed_var.add_field(name="`help`", value="Sends this command list. Contact me in Discord @ danmaruchi#8034", inline=False)
     
     await ctx.send(embed=embed_var)   
     
