@@ -1,6 +1,6 @@
 import requests, discord
 from env import API_KEY, PROXIES
-
+from loguru import logger
 def get_player_stats(tag: str):
     url = f'https://api.clashofclans.com/v1/players/{tag}'
     headers = {
@@ -23,6 +23,7 @@ def get_player_stats(tag: str):
 
 def get_stats_embed(tag: str) -> discord.Embed:
     data = get_player_stats(tag)
+    logger.debug(f'data: {data}')
     embed_data = {
       'player_name': data['name'],
       'clan_name': data['clan']['name'],
