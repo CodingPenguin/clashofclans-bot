@@ -1,6 +1,8 @@
 import requests, discord
 from env import API_KEY, PROXIES
 from loguru import logger
+
+
 def get_player_stats(tag: str):
     url = f'https://api.clashofclans.com/v1/players/{tag}'
     headers = {
@@ -13,8 +15,9 @@ def get_player_stats(tag: str):
         response = requests.get(url, headers=headers, proxies=PROXIES)
         response.raise_for_status()
         print(response.status_code)
-    except:
-        return "There was an error with the request. Please try again later."
+    except Exception as e:
+        logger.error(f'ERROR: {e}')
+        return None
     
     res = response.json()
     print(res)
@@ -24,6 +27,13 @@ def get_player_stats(tag: str):
 def get_stats_embed(tag: str) -> discord.Embed:
     data = get_player_stats(tag)
     logger.debug(f'data: {data}')
+    if data is None:
+        embed_var = discord.Embed(
+            title='Request Error',
+            color=0xFF0000
+        )
+        return embed_var
+    
     embed_data = {
       'player_name': data['name'],
       'clan_name': data['clan']['name'],
@@ -40,6 +50,7 @@ def get_stats_embed(tag: str) -> discord.Embed:
 def set_stats_embed(embed_data: dict[str]) -> discord.Embed:
     embed_var = discord.Embed(
       title=f"{embed_data['player_name']}'s Stats",
+      description="There was an error with the request. Please try again later."
       color=0xD40C00
     )
     embed_var.add_field(
