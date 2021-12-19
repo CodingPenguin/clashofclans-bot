@@ -18,17 +18,19 @@ coc stats #GY2GJLCP
 ```
 When ran, and the user has already been verified, no additional arguments are required.
 
-<img src='https://user-images.githubusercontent.com/11476519/128583213-a3e8eeb6-d76f-49bd-b142-e89e2a2d2825.png' width="500" height="500"/>
+<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cocstats.png' width="500" height="500"/>
 
 ### coc graph
 
 This command requires user verification before use. The user's saved trophy data will be plotted (via matplotlib) on a line graph. New data can only be saved once daily, but the graph can be seen as many times as prompted. 
 
-<img src='https://user-images.githubusercontent.com/11476519/128583210-8a603e61-7512-4c85-afd1-5c429ba740b2.png' width="500" height="500" />
+<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cocgraph.png' width="600" height="500" />
 
 ### coc hero
 
 This command fetches the hero levels of each hero the player has. In the future, this should include how far the player is from maxing out their heroes for their Town Hall level. Requires verification.
+
+<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cochero.png' width="500" height="500" />
 
 ### coc zap
 
