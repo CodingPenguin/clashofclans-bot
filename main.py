@@ -6,6 +6,7 @@ from loguru import logger
 
 from discord.errors import HTTPException
 from discord.ext import commands
+from helpers.constants import BH_HEROES, TH_HEROES
 from helpers.graph import plot_trophy_graph, set_graph_embed
 
 from helpers.stats import get_player_stats, get_stats_embed
@@ -27,6 +28,8 @@ client = commands.Bot(command_prefix='coc ', intents=intents, help_command=None)
 async def on_ready():
     logger.info(f'We have logged in as {client.user}')    
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(client.guilds)} servers"))
+    
+    
 @client.event
 async def on_message(message):   
     if message.author == client.user:
@@ -34,7 +37,9 @@ async def on_message(message):
 
     if message.content == "coc":
         logger.info('coc')
-        await message.channel.send(f"Hello {message.author.name}! Did you know I'm on {len(client.guilds)} Discord servers? I'm more popular than you!")
+        await message.channel.send(
+            f"Hello {message.author.name}! Did you know I'm on {len(client.guilds)} Discord servers? Also, there are {col.count_documents({})} verified users using me. I'm more popular than you!"
+        )
         
     await client.process_commands(message)
 
@@ -182,11 +187,17 @@ async def hero(ctx):
     
     if 'townHallLevel' not in player_stats:
         await ctx.send('There was an error with the Clash of Clans API. Please try again later.')
+        return
     if 'heroes' not in player_stats:
         await ctx.send('There was an error with the Clash of Clans API. Please try again later.')
+        return
         
-    th_level = player_stats['townHallLevel']
+    hall_level = player_stats['townHallLevel']
     heroes = player_stats['heroes']
+    
+    if not len(heroes):
+        await ctx.send("You don't have any heroes :(")
+        return
     
     embed_var = discord.Embed(
       title=f"{player_stats['name']}'s Heroes",
@@ -194,21 +205,39 @@ async def hero(ctx):
     )
     
     for hero in heroes:
+        HERO_DICT = TH_HEROES
         if hero['name'] == 'Barbarian King':
             hero_name = f"{hero['name']} 👑"
         elif hero['name'] == 'Archer Queen':
             hero_name = f"{hero['name']} 🏹"
         elif hero['name'] == 'Grand Warden':
             hero_name = f"{hero['name']} 🪄"
+        elif hero['name'] == 'Royal Champion':
+            hero_name = f"{hero['name']} 🔱"
         elif hero['name'] == 'Battle Machine':
             hero_name = f"{hero['name']} 🔨"
+            HERO_DICT = BH_HEROES
+            hall_level = player_stats['builderHallLevel']
+        
         else:
             hero_name = hero['name']
+        
+        max_hero_level = HERO_DICT[hall_level][hero['name']]['max_level']
+        maxed_percentage = round((hero["level"] / max_hero_level) * 100, 2)
+        
+        if (level_to_max := max_hero_level - hero['level']):
+            time_to_max = HERO_DICT[hall_level][hero['name']]['max_time'][-level_to_max:]
+            time_to_max = sum(time_to_max) / 24
+            embed_value = f"Level {hero['level']} ({maxed_percentage}%)\nYour {hero['name']} is {level_to_max} level(s) away from maxed.\nOnly {time_to_max} days left to go."
+        else:
+            embed_value = f"Level {hero['level']} ({maxed_percentage}%)\nYour {hero['name']} is maxed.\nThat's some dedication!"
+            
         embed_var.add_field(
             name=hero_name,
-            value=f"Level {hero['level']}",
+            value=embed_value,
             inline=False
-        )    
+        )
+        
     await ctx.send(embed=embed_var)
     
     

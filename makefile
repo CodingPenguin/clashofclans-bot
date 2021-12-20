@@ -1,5 +1,5 @@
-run-prod:
-	source ./.env && python3 main.py
+run:
+	heroku local
 
 install:
 	python3 -m pip install -r requirements.txt
