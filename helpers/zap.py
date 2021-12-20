@@ -2,7 +2,6 @@ import discord, math
 from helpers.constants import AIRDEF_HPS, ZAP_APS
 
 async def set_zap_embed(airdef, zap):
-    print(AIRDEF_HPS)
     airdef_hp = AIRDEF_HPS[airdef]
     zap_ap = ZAP_APS[zap]
     amount_of_zaps = math.ceil(airdef_hp/zap_ap)
