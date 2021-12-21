@@ -1,5 +1,5 @@
 from env import API_KEY, PROXIES, TOKEN, MONGO_SRV_URL
-import discord, requests
+import discord, requests, asyncio
 from pymongo import MongoClient
 from datetime import date
 from loguru import logger
@@ -37,10 +37,13 @@ async def on_message(message):
 
     if message.content == "coc":
         logger.info('coc')
-        await message.channel.send(
+        couroutines = []
+        couroutines.append(message.channel.send(
             f"Hello {message.author.name}! Did you know I'm on {len(client.guilds)} Discord servers? Also, there are {col.count_documents({})} verified users using me. I'm more popular than you!"
-        )
-        
+        ))
+        couroutines.append(client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(client.guilds)} servers")))
+        await asyncio.gather(*couroutines)
+    
     await client.process_commands(message)
 
 
@@ -48,7 +51,7 @@ async def on_message(message):
 async def help(ctx):
     logger.info('help')
     
-    embed_var  = discord.Embed(
+    embed_var = discord.Embed(
         title="Commands!", 
         description="Every command starts with the prefix \"coc\" followed by a space and the keyword.",
         color=0x000000
@@ -70,14 +73,12 @@ async def help(ctx):
 async def stats(ctx, tag: str=None):
     logger.info('stats')
     
-    verified = False
     author_id = str(ctx.author.id)
     selector = {'_id': author_id}
     if (user := col.find_one(selector)) is not None:
         user_tag = user['player_tag']
-        verified = True
     
-    if verified and tag is None:
+    if user and tag is None:
         await ctx.send(embed=get_stats_embed(user_tag))
         return
     if tag is None:
@@ -131,8 +132,8 @@ async def verify(ctx):
         if res['status'] == 'ok':
             write_to_db(author_id, user_tag) # async 1
             embed_var = set_verify_embed(ctx.author.name) # async 2
-            await ctx.send(embed=embed_var)
-            await ctx.author.send("Verified!") # send verified in dm
+            await ctx.send(embed=embed_var) # async 3
+            await ctx.author.send("Verified!") # send verified in dm, async 4
         else:
             await ctx.author.send("Please try again by saying `coc verify` in the server. Check for typos.")
             
@@ -266,7 +267,7 @@ async def zapquake(ctx, airdef="0", zap="0", quake="0"):
     try:
         airdef = int(airdef)
         zap = int(zap)
-        quake=int(quake)
+        quake = int(quake)
     except Exception:
         await ctx.send("Please enter valid air defense, lightning spell, and/or earthquake spell levels. You didn't put in numbers.")
         
