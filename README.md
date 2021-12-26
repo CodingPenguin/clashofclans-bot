@@ -4,7 +4,7 @@ This bot is used to fetch in-game player data by using the official [Clash of Cl
 
 ## Commands
 
-Currently, seven commands are able to be used.
+Currently, eight commands are able to be used.
 
 ### coc verify
 
@@ -19,6 +19,23 @@ coc stats #GY2GJLCP
 When ran, and the user has already been verified, no additional arguments are required.
 
 <img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cocstats.png' width="500" height="500"/>
+
+### coc clan
+
+This command requires user verification before use. If the user does not have a default clan saved, the user will need to input a clan tag: <br />
+```
+coc clan #2PGJUGPR
+```
+
+At this point, the bot will prompt if the user would like to save the inputted clan tag as their default clan. If so, the next instance of `coc clan` will not need a clan tag; instead, it will fetch the clan data from the saved clan tag: <br />
+```
+coc clan
+```
+
+And if you're curious what metrics are shown, here are some images! <br />
+
+<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cocclan1.png' /> <br />
+<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cocclan2.png' />
 
 ### coc graph
 

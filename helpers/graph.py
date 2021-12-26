@@ -34,4 +34,3 @@ def set_graph_embed(author_name):
     )
     embed_var.set_image(url="attachment://graph.png")
     return embed_var
-# END COC GRAPH HELPERS

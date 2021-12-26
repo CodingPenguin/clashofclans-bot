@@ -1,16 +1,19 @@
-from env import API_KEY, PROXIES, TOKEN, MONGO_SRV_URL
 import discord, requests, asyncio
+from env import API_KEY, PROXIES, TOKEN, MONGO_SRV_URL
+
 from pymongo import MongoClient
 from datetime import date
 from loguru import logger
 
+from discord.embeds import Embed
 from discord.errors import HTTPException
 from discord.ext import commands
+
 from helpers.constants import BH_HEROES, TH_HEROES
 from helpers.graph import plot_trophy_graph, set_graph_embed
-
 from helpers.stats import get_player_stats, get_stats_embed
 from helpers.verify import set_verify_embed, write_to_db
+from helpers.clan import fetch_clan_contents, send_clan_contents, set_default_clan
 from helpers.zap import set_zap_embed
 from helpers.zapquake import set_zapquake_embed
 
@@ -59,15 +62,17 @@ async def help(ctx):
     
     embed_var.add_field(name="`stats`", value="Retrieve's player's stats.\nEx: coc stats [player_tag]\nUNLESS you have already verified using coc verify, in which case:\ncoc stats.", inline=False)
     embed_var.add_field(name="`verify`", value="Verifies and authenticates you by matching up your Discord ID to your CoC player tag.\nFollow instructions in DMs.\nEx: coc verify", inline=False)
+    embed_var.add_field(name="`clan`", value="Retrieve's clan stats.\nOnly available once you have verified using coc verify.\nEx: coc clan [clan_tag]\nUNLESS you set up your default clan already:\nEx: coc clan", inline=False)
     embed_var.add_field(name="`graph`", value="Plots your trophy count daily.\nHas to be run manually each day, and can only retrieve new trophy counts each day.\nOnly available once you have verified using coc verify.\nEx: coc graph", inline=False)
-    embed_var.add_field(name="`hero`", value="Lists your hero levels.\nTells how far you are from maxed hero levels at your Town Hall level.\nOnly available once you have verified using coc verify.\nEx: coc hero")
+    embed_var.add_field(name="`hero`", value="Lists your hero levels.\nTells how far you are from maxed hero levels at your Town Hall level.\nOnly available once you have verified using coc verify.\nEx: coc hero", inline=False)
     embed_var.add_field(name="`zap`", value="Tells the player how many lightning spells are required to destroy an air defense.\nThis command requires two parameters: the air defense level and your lightning spell level.\nEx: coc zap [air defense level] [lightning spell level]", inline=False)
     embed_var.add_field(name="`zapquake`", value="Tells the player how many lightning and earthquake spells are required to destroy an air defense.\nThis command requires three parameters: the air defense level and a lightning spell level, and an earthquake spell level.\nEx: coc zapquake [air defense level] [lightning spell level] [earthquake spell level]", inline=False)
     embed_var.add_field(name="`help`", value="Sends this command list.", inline=False)
-    embed_var.add_field(name="Contribute & Support", value="For further inquiries, contact me in Discord @ danmaruchi#8034.\nIf you are satisfied with this bot, leave a review on [Top.gg](https://top.gg/bot/870085172136149002)!\nAnd if you want to support me directly, [buy me a coffee](https://www.buymeacoffee.com/danmaruchi)!")
+    embed_var.add_field(name="Contribute & Support", value="For further inquiries, contact me in Discord @ danmaruchi#8034.\nIf you are satisfied with this bot, leave a review on [Top.gg](https://top.gg/bot/870085172136149002)!\nAnd if you want to support me directly, [buy me a coffee](https://www.buymeacoffee.com/danmaruchi)!", inline=False)
+    embed_var.set_footer(text='danmaruchi', icon_url='https://cdn.discordapp.com/avatars/474331401529851924/355869a0e2c8b60230120280656c7abe.webp?size=1024')
     
     await ctx.send(embed=embed_var)   
-    
+     
      
 @client.command()
 async def stats(ctx, tag: str=None):
@@ -242,7 +247,36 @@ async def hero(ctx):
         
     await ctx.send(embed=embed_var)
     
+
+@client.command()
+async def clan(ctx, clan_tag: str=''):
+    logger.info('clan')
+    author_id = str(ctx.author.id)
+    selector = {'_id': author_id}
+    projection = {'clan_tag': 1}
+    if (user_data := col.find_one(selector, projection)) is None:
+        await ctx.send("Please verify by using `coc verify` to use `coc clan`")        
+        return
     
+    if clan_tag == '' and 'clan_tag' in user_data:
+        clan_tag = user_data['clan_tag']
+        contents = await fetch_clan_contents(clan_tag)
+    elif len(clan_tag):
+        try:
+            contents = await set_default_clan(client, ctx, clan_tag, author_id)  
+        except Exception as e:
+            await ctx.send(e)
+    else:
+        error_embed = Embed(title='Input Error', description='Please enter a clan tag!', color=0xFF0000)
+        await ctx.send(embed=error_embed)
+    
+    try:
+        await send_clan_contents(client, ctx, contents)
+    except Exception as e:
+        logger.error(f'ERROR: {e}')
+        await ctx.send('There was an internal error. Please try again later.')
+        
+        
 @client.command()
 async def zap(ctx, airdef="0", zap="0"):
     logger.info('zap')
