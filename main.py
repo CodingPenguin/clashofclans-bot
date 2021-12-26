@@ -1,3 +1,4 @@
+from discord.embeds import Embed
 from env import API_KEY, PROXIES, TOKEN, MONGO_SRV_URL
 import discord, requests, asyncio
 from pymongo import MongoClient
@@ -6,6 +7,7 @@ from loguru import logger
 
 from discord.errors import HTTPException
 from discord.ext import commands
+from helpers.clan import fetch_clan_contents, save_clan_tag, send_clan_contents, set_default_clan
 from helpers.constants import BH_HEROES, TH_HEROES
 from helpers.graph import plot_trophy_graph, set_graph_embed
 
@@ -242,7 +244,36 @@ async def hero(ctx):
         
     await ctx.send(embed=embed_var)
     
+
+@client.command()
+async def clan(ctx, clan_tag: str=''):
+    logger.info('clan')
+    author_id = str(ctx.author.id)
+    selector = {'_id': author_id}
+    projection = {'clan_tag': 1}
+    if (user_data := col.find_one(selector, projection)) is None:
+        await ctx.send("Please verify by using `coc verify` to use `coc clan`")        
+        return
     
+    if clan_tag == '' and 'clan_tag' in user_data:
+        clan_tag = user_data['clan_tag']
+        contents = await fetch_clan_contents(clan_tag)
+    elif len(clan_tag):
+        try:
+            contents = await set_default_clan(client, ctx, clan_tag, author_id)  
+        except Exception as e:
+            await ctx.send(e)
+    else:
+        error_embed = Embed(title='Input Error', description='Please enter a clan tag!', color=0xFF0000)
+        await ctx.send(embed=error_embed)
+    
+    try:
+        await send_clan_contents(client, ctx, contents)
+    except Exception as e:
+        logger.error(f'ERROR: {e}')
+        await ctx.send('There was an internal error. Please try again later.')
+        
+        
 @client.command()
 async def zap(ctx, airdef="0", zap="0"):
     logger.info('zap')
