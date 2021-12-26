@@ -40,12 +40,12 @@ async def on_message(message):
 
     if message.content == "coc":
         logger.info('coc')
-        couroutines = []
-        couroutines.append(message.channel.send(
+        coroutines = []
+        coroutines.append(message.channel.send(
             f"Hello {message.author.name}! Did you know I'm on {len(client.guilds)} Discord servers? Also, there are {col.count_documents({})} verified users using me. I'm more popular than you!"
         ))
-        couroutines.append(client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(client.guilds)} servers")))
-        await asyncio.gather(*couroutines)
+        coroutines.append(client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(client.guilds)} servers")))
+        await asyncio.gather(*coroutines)
     
     await client.process_commands(message)
 
@@ -274,7 +274,6 @@ async def clan(ctx, clan_tag: str=''):
         await send_clan_contents(client, ctx, contents)
     except Exception as e:
         logger.error(f'ERROR: {e}')
-        await ctx.send('There was an internal error. Please try again later.')
         
         
 @client.command()

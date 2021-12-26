@@ -9,6 +9,7 @@ from discord import Embed
 from discord.errors import ClientException, HTTPException
 
 from helpers.clan.helpers.general import fetch_general_clan_stats
+from helpers.clan.helpers.leaderboard import fetch_leaderboard
 from helpers.clan.helpers.member import fetch_member_stats
 
 from helpers.clan.models import ClanBase
@@ -51,8 +52,12 @@ async def fetch_clan_contents(clan_tag):
     contents = []
     contents.append(fetch_general_clan_stats(clan_stats))
     contents.append(fetch_member_stats(clan_stats))
+    contents.append(fetch_leaderboard(clan_stats))
+    
     try:
         contents = await asyncio.gather(*contents)
+        leaderboards = contents.pop(2)
+        contents.extend(leaderboards)
     except Exception as e:
         logger.error(f'ERROR: {e}')
         
@@ -158,4 +163,5 @@ async def send_clan_contents(client, ctx, contents):
             else:
                 await message.remove_reaction(reaction, user)
         except asyncio.TimeoutError:
+            await message.clear_reactions()
             break
