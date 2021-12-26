@@ -78,7 +78,7 @@ async def save_clan_tag(user_id: str, clan_tag: str):
     
 async def set_default_clan(client, ctx, clan_tag, author_id):    
     def check(reaction, user):
-        return user == ctx.author and str(reaction.emoji) == '✅'
+        return user == ctx.author and str(reaction.emoji) in ['✅', '❌']
     
     try:
         contents = await fetch_clan_contents(clan_tag)
@@ -92,12 +92,11 @@ async def set_default_clan(client, ctx, clan_tag, author_id):
     )
     message = await ctx.send(embed=save_embed)
     await message.add_reaction('✅')
+    await message.add_reaction('❌')
     
     while True:
         try:
-            reaction, user = await client.wait_for("reaction_add", timeout=60, check=check)
-            logger.debug(reaction)
-            logger.debug(reaction.emoji)
+            reaction, user = await client.wait_for("reaction_add", timeout=120, check=check)
             if str(reaction.emoji) == '✅':
                 try:
                     await save_clan_tag(author_id, clan_tag)
@@ -107,10 +106,21 @@ async def set_default_clan(client, ctx, clan_tag, author_id):
                         color=0x32C12C
                     )
                     await ctx.send(embed=saved_embed)
+                    await message.delete()
                     break
                 except Exception as e:
                     await ctx.send(e)
+                    await message.delete()
                     break
+            elif str(reaction.emoji) == '❌':
+                not_saved_embed = Embed(
+                    title="Not saved! ✅",
+                    description=f"Clan {clan_tag} has NOT been set as your default clan.",
+                    color=0x32C12C
+                )
+                await ctx.send(embed=not_saved_embed)
+                await message.delete()
+                break
             else:
                 message.remove_reaction(reaction, user)
         except asyncio.TimeoutError:

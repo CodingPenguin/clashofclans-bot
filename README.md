@@ -4,7 +4,7 @@ This bot is used to fetch in-game player data by using the official [Clash of Cl
 
 ## Commands
 
-Currently, seven commands are able to be used.
+Currently, eight commands are able to be used.
 
 ### coc verify
 
@@ -20,6 +20,9 @@ When ran, and the user has already been verified, no additional arguments are re
 
 <img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cocstats.png' width="500" height="500"/>
 
+### coc clan
+
+This command requires user verification before use. If the user does not have a default clan saved, the bot will prompt if they would like to save the inputted clan tag as their default clan. If so, 
 ### coc graph
 
 This command requires user verification before use. The user's saved trophy data will be plotted (via matplotlib) on a line graph. New data can only be saved once daily, but the graph can be seen as many times as prompted. 
