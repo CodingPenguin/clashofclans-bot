@@ -1,15 +1,18 @@
-from discord import Embed
-from discord.client import Client
 import requests, json, asyncio
-from discord.errors import ClientException, HTTPException
 from env import API_KEY, PROXIES, MONGO_SRV_URL
+
 from loguru import logger
 from pydantic import ValidationError
 from pymongo import MongoClient
+
+from discord import Embed
+from discord.errors import ClientException, HTTPException
+
 from helpers.clan.helpers.general import fetch_general_clan_stats
 from helpers.clan.helpers.member import fetch_member_stats
 
 from helpers.clan.models import ClanBase
+
 
 async def fetch_clan_stats(clan_tag: str):
     if clan_tag.startswith('#'):
@@ -30,6 +33,7 @@ async def fetch_clan_stats(clan_tag: str):
     res = ClanBase(**res)
     
     return json.loads(res.json())
+
 
 async def fetch_clan_contents(clan_tag):
     try:
@@ -54,6 +58,7 @@ async def fetch_clan_contents(clan_tag):
         
     return contents
     
+    
 async def save_clan_tag(user_id: str, clan_tag: str):
     mongo_client = MongoClient(MONGO_SRV_URL)
     db = mongo_client.coc
@@ -69,6 +74,7 @@ async def save_clan_tag(user_id: str, clan_tag: str):
     except Exception as e:
         logger.error(f'ERROR: {e}')
         raise Exception('There was a database error. Clan was not saved as default clan.')
+    
     
 async def set_default_clan(client, ctx, clan_tag, author_id):    
     def check(reaction, user):

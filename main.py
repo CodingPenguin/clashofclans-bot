@@ -1,18 +1,19 @@
-from discord.embeds import Embed
-from env import API_KEY, PROXIES, TOKEN, MONGO_SRV_URL
 import discord, requests, asyncio
+from env import API_KEY, PROXIES, TOKEN, MONGO_SRV_URL
+
 from pymongo import MongoClient
 from datetime import date
 from loguru import logger
 
+from discord.embeds import Embed
 from discord.errors import HTTPException
 from discord.ext import commands
-from helpers.clan import fetch_clan_contents, save_clan_tag, send_clan_contents, set_default_clan
+
 from helpers.constants import BH_HEROES, TH_HEROES
 from helpers.graph import plot_trophy_graph, set_graph_embed
-
 from helpers.stats import get_player_stats, get_stats_embed
 from helpers.verify import set_verify_embed, write_to_db
+from helpers.clan import fetch_clan_contents, send_clan_contents, set_default_clan
 from helpers.zap import set_zap_embed
 from helpers.zapquake import set_zapquake_embed
 

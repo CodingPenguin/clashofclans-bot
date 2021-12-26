@@ -1,4 +1,6 @@
 from discord import Embed
+
+
 async def fetch_general_clan_stats(clan_stats) -> Embed:
     clan_name = clan_stats['name']
     first_content_page = Embed(
