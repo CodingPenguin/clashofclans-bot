@@ -34,8 +34,8 @@ coc clan
 
 And if you're curious what metrics are shown, here are some images! <br />
 
-<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cocclan1.png' /> <br />
-<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cocclan2.png' />
+<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cocclan1.png' width="500"/> <br />
+<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cocclan2.png' width="500"/>
 
 ### coc graph
 
