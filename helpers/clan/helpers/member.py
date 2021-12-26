@@ -43,30 +43,4 @@ async def fetch_member_stats(clan_stats) -> Embed:
         inline=True
     )
     
-    top_fifth = math.floor(clan_size / 5)
-    member_page.add_field(
-        name=f'Leaderboard (Top {top_fifth})',
-        value='sorted by trophies',
-        inline=False
-    )
-    for idx in range(top_fifth):
-        member = clan_stats['members'][idx]
-        if (role := member['role']) == 'leader':
-            role = 'Leader'
-        elif role == 'coLeader':
-            role = 'Co-leader'
-        elif role == 'admin':
-            role = 'Elder'
-        else:
-            role = 'Member'
-        
-        if member['donations_received'] == 0:
-            donation_ratio = member['donations']
-        else:
-            donation_ratio = round(member['donations'] / member['donations_received'], 3)
-        member_page.add_field(
-            name=f"{idx+1}. {member['name']} ({role})",
-            value=f"{member['league']['name']}: {member['trophies']} 🏆\nVersus: {member['versus_trophies']} 🏆\nDonation Ratio: {donation_ratio} ({member['donations']}/{member['donations_received']}) 🤲",
-            inline=False
-        )
     return member_page
