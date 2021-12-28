@@ -54,24 +54,70 @@ async def on_message(message):
 async def help(ctx):
     logger.info('help')
     
-    embed_var = discord.Embed(
+    help_contents = []
+    help0 = Embed(
         title="Commands!", 
         description="Every command starts with the prefix \"coc\" followed by a space and the keyword.",
         color=0x000000
     )
     
-    embed_var.add_field(name="`stats`", value="Retrieve's player's stats.\nEx: coc stats [player_tag]\nUNLESS you have already verified using coc verify, in which case:\ncoc stats.", inline=False)
-    embed_var.add_field(name="`verify`", value="Verifies and authenticates you by matching up your Discord ID to your CoC player tag.\nFollow instructions in DMs.\nEx: coc verify", inline=False)
-    embed_var.add_field(name="`clan`", value="Retrieve's clan stats.\nOnly available once you have verified using coc verify.\nEx: coc clan [clan_tag]\nUNLESS you set up your default clan already:\nEx: coc clan", inline=False)
-    embed_var.add_field(name="`graph`", value="Plots your trophy count daily.\nHas to be run manually each day, and can only retrieve new trophy counts each day.\nOnly available once you have verified using coc verify.\nEx: coc graph", inline=False)
-    embed_var.add_field(name="`hero`", value="Lists your hero levels.\nTells how far you are from maxed hero levels at your Town Hall level.\nOnly available once you have verified using coc verify.\nEx: coc hero", inline=False)
-    embed_var.add_field(name="`zap`", value="Tells the player how many lightning spells are required to destroy an air defense.\nThis command requires two parameters: the air defense level and your lightning spell level.\nEx: coc zap [air defense level] [lightning spell level]", inline=False)
-    embed_var.add_field(name="`zapquake`", value="Tells the player how many lightning and earthquake spells are required to destroy an air defense.\nThis command requires three parameters: the air defense level and a lightning spell level, and an earthquake spell level.\nEx: coc zapquake [air defense level] [lightning spell level] [earthquake spell level]", inline=False)
-    embed_var.add_field(name="`help`", value="Sends this command list.", inline=False)
-    embed_var.add_field(name="Contribute & Support", value="For further inquiries, contact me in Discord @ danmaruchi#8034.\nIf you are satisfied with this bot, leave a review on [Top.gg](https://top.gg/bot/870085172136149002)!\nAnd if you want to support me directly, [buy me a coffee](https://www.buymeacoffee.com/danmaruchi)!", inline=False)
-    embed_var.set_footer(text='danmaruchi', icon_url='https://cdn.discordapp.com/avatars/474331401529851924/355869a0e2c8b60230120280656c7abe.webp?size=1024')
+    help0.add_field(name="`verify`", value="Verifies and authenticates you by matching up your Discord ID to your CoC player tag. Many of the following commands require verification before use.\nFollow instructions in DMs.\nEx: coc verify", inline=False)
+    help0.add_field(name="`clan`", value="Retrieve's clan stats. Currently, the most comprehensive ClashStats has available.\nOnly available once you have verified using coc verify.\nEx: coc clan [clan_tag]\nUNLESS you set up your default clan already:\nEx: coc clan", inline=False)
+    help0.add_field(name="`stats`", value="Retrieve's player's stats.\nEx: coc stats [player_tag]\nUNLESS you have already verified using coc verify, in which case:\ncoc stats.", inline=False)
+    help0.add_field(name="`graph`", value="Plots your trophy count daily.\nHas to be run manually each day, and can only retrieve new trophy counts each day.\nOnly available once you have verified using coc verify.\nEx: coc graph", inline=False)
     
-    await ctx.send(embed=embed_var)   
+    help1 = Embed(
+        title="Commands!", 
+        description="Every command starts with the prefix \"coc\" followed by a space and the keyword.",
+        color=0x000000
+    )
+    help1.add_field(name="`hero`", value="Lists your hero levels.\nTells how far you are from maxed hero levels at your Town Hall level.\nOnly available once you have verified using coc verify.\nEx: coc hero", inline=False)
+    help1.add_field(name="`zap`", value="Tells the player how many lightning spells are required to destroy an air defense.\nThis command requires two parameters: the air defense level and your lightning spell level.\nEx: coc zap [air defense level] [lightning spell level]", inline=False)
+    help1.add_field(name="`zapquake`", value="Tells the player how many lightning and earthquake spells are required to destroy an air defense.\nThis command requires three parameters: the air defense level and a lightning spell level, and an earthquake spell level.\nEx: coc zapquake [air defense level] [lightning spell level] [earthquake spell level]", inline=False)
+    help1.add_field(name="`help`", value="Sends this command list.", inline=False)
+    
+    help2 = Embed(
+        title="Contribute & Support", 
+        color=0x000000
+    )
+    help2.add_field(name="Questions", value="Contact me in Discord @ danmaruchi#8034, or join the support server [here](https://discord.gg/6MXVXxK7pb).", inline=False)
+    help2.add_field(name="Leave a review & vote", value="If you found ClashStats helpful in any way, leave a review or simply vote for ClashStats on [Top.gg](https://top.gg/bot/870085172136149002)! It takes less than a minute, and helps push out ClashStats to more players.", inline=False)
+    help2.add_field(name="Donate", value="And if you want to support me directly, consider [buying me a coffee](https://www.buymeacoffee.com/danmaruchi). I'm a broke college student, so anything helps.", inline=False)
+    
+    help_contents.append(help0)
+    help_contents.append(help1)
+    help_contents.append(help2)
+    
+    pages = len(help_contents)
+    cur_page = 1
+    for idx, content in enumerate(help_contents):
+        content.set_footer(text=f'danmaruchi\npage {idx+1}/{pages}', icon_url='https://cdn.discordapp.com/avatars/474331401529851924/355869a0e2c8b60230120280656c7abe.webp?size=1024')
+    message = await ctx.send(embed=help_contents[cur_page-1])
+    await message.add_reaction("◀️")
+    await message.add_reaction("▶️")
+
+    def check(reaction, user):
+        return user == ctx.author and str(reaction.emoji) in ['◀️', '▶️']
+        
+    while True:
+        try:
+            reaction, user = await client.wait_for("reaction_add", timeout=120, check=check)
+
+            if str(reaction.emoji) == "▶️" and cur_page != pages:
+                cur_page += 1
+                await message.edit(embed=help_contents[cur_page-1])
+                await message.remove_reaction(reaction, user)
+                
+            elif str(reaction.emoji) == "◀️" and cur_page > 1:
+                cur_page -= 1
+                await message.edit(embed=help_contents[cur_page-1])
+                await message.remove_reaction(reaction, user)
+                
+            else:
+                await message.remove_reaction(reaction, user)
+        except asyncio.TimeoutError:
+            await message.clear_reactions()
+            break   
      
      
 @client.command()
