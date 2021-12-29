@@ -41,8 +41,13 @@ async def on_message(message):
     if message.content == "coc":
         logger.info('coc')
         coroutines = []
+        coc_embed = Embed(
+            title="ClashStats",
+            description=f"Hello {message.author.name}!\nDid you know I'm on {len(client.guilds)} Discord servers?\nAlso, there are {col.count_documents({})} verified users using me. I'm more popular than you!",
+            color=0x000000
+        )
         coroutines.append(message.channel.send(
-            f"Hello {message.author.name}! Did you know I'm on {len(client.guilds)} Discord servers? Also, there are {col.count_documents({})} verified users using me. I'm more popular than you!"
+            embed=coc_embed
         ))
         coroutines.append(client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(client.guilds)} servers")))
         await asyncio.gather(*coroutines)
@@ -74,6 +79,7 @@ async def help(ctx):
     help1.add_field(name="`hero`", value="Lists your hero levels.\nTells how far you are from maxed hero levels at your Town Hall level.\nOnly available once you have verified using coc verify.\nEx: coc hero", inline=False)
     help1.add_field(name="`zap`", value="Tells the player how many lightning spells are required to destroy an air defense.\nThis command requires two parameters: the air defense level and your lightning spell level.\nEx: coc zap [air defense level] [lightning spell level]", inline=False)
     help1.add_field(name="`zapquake`", value="Tells the player how many lightning and earthquake spells are required to destroy an air defense.\nThis command requires three parameters: the air defense level and a lightning spell level, and an earthquake spell level.\nEx: coc zapquake [air defense level] [lightning spell level] [earthquake spell level]", inline=False)
+    help1.add_field(name='`invite`', value="Fetches the permanent ClashStats Discord invite link.", inline=False)
     help1.add_field(name="`help`", value="Sends this command list.", inline=False)
     
     help2 = Embed(
@@ -91,7 +97,7 @@ async def help(ctx):
     pages = len(help_contents)
     cur_page = 1
     for idx, content in enumerate(help_contents):
-        content.set_footer(text=f'danmaruchi\npage {idx+1}/{pages}', icon_url='https://cdn.discordapp.com/avatars/474331401529851924/355869a0e2c8b60230120280656c7abe.webp?size=1024')
+        content.set_footer(text=f'Want to invite me? Run coc invite to get my invite link!\npage {idx+1}/{pages}')
     message = await ctx.send(embed=help_contents[cur_page-1])
     await message.add_reaction("◀️")
     await message.add_reaction("▶️")
@@ -120,6 +126,18 @@ async def help(ctx):
             break   
      
      
+
+@client.command()
+async def invite(ctx):
+    logger.info('invite')
+    invite_embed = Embed(
+        title="Invite me to your server!",
+        description="[ClashStats Invite Link](https://discord.com/api/oauth2/authorize?client_id=870085172136149002&permissions=414464658496&scope=bot%20applications.commands)",
+        color=0x000000
+    )
+    await ctx.send(embed=invite_embed)
+    
+    
 @client.command()
 async def stats(ctx, tag: str=None):
     logger.info('stats')
@@ -197,7 +215,11 @@ async def graph(ctx):
     author_id = str(ctx.author.id)
     selector = {'_id': author_id}
     if (user_data := col.find_one(selector)) is None:
-        await ctx.send("Please verify by using `coc verify` to use `coc graph`")        
+        remind_embed = Embed(
+            title="Verification Required",
+            description="Please verify by running `coc verify` to run `coc graph`"
+        )
+        await ctx.send(embed=remind_embed)        
         return
     
     today = str(date.today().strftime('%b %d %y'))
