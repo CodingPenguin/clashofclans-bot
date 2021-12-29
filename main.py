@@ -185,9 +185,10 @@ async def verify(ctx):
             embed_var = set_verify_embed(ctx.author.name) # async 2
             await ctx.send(embed=embed_var) # async 3
             await ctx.author.send("Verified!") # send verified in dm, async 4
-        else:
+        elif res['status'] == 'invalid':
             await ctx.author.send("Please try again by saying `coc verify` in the server. Check for typos.")
-            
+    elif 'status' not in res:
+        await ctx.author.send("There was an error with the Clash of Clans API. Please try again later, or report this issue in the support server.")
             
 @client.command()
 async def graph(ctx):
