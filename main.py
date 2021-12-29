@@ -43,7 +43,7 @@ async def on_message(message):
         coroutines = []
         coc_embed = Embed(
             title="ClashStats",
-            description=f"Hello {message.author.name}!\nDid you know I'm on {len(client.guilds)} Discord servers?\nAlso, there are {col.count_documents({})} verified users using me. I'm more popular than you!",
+            description=f"Hello {message.author.name}!\nDid you know I'm on **{len(client.guilds)}** Discord servers?\nAlso, there are **{col.count_documents({})}** verified users using me. I'm more popular than you!",
             color=0x000000
         )
         coroutines.append(message.channel.send(
