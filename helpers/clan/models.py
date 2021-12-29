@@ -9,8 +9,8 @@ class WarLeagueBase(BaseModel):
 class LocationBase(BaseModel):
     id: int = Field(...)
     name: str = Field(...)
-    is_country: bool = Field(..., alias='isCountry')
-    country_code: str = Field(..., alias='countryCode')
+    is_country: bool = Field(default=False, alias='isCountry')
+    country_code: str = Field(default=None, alias='countryCode')
     
 class BadgeBase(BaseModel):
     small: str = None
@@ -20,7 +20,7 @@ class BadgeBase(BaseModel):
 class LeagueBase(BaseModel):
     id: int = Field(...)
     name: str = Field(...)
-    icon_urls: BadgeBase = Field(..., alias='iconUrls')
+    icon_urls: BadgeBase = Field(default=None, alias='iconUrls')
     
 class MemberBase(BaseModel):
     tag: str = Field(...)
