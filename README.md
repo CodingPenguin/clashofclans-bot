@@ -18,7 +18,7 @@ coc stats #GY2GJLCP
 ```
 When ran, and the user has already been verified, no additional arguments are required.
 
-<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cocstats.png' width="500" height="500"/>
+<img src='https://res.cloudinary.com/clashstats/image/upload/c_mfit,h_500,w_500/v1640840697/readme/cocstats_jbbfow.png' />
 
 ### coc clan
 
@@ -34,20 +34,20 @@ coc clan
 
 And if you're curious what metrics are shown, here are some images! <br />
 
-<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cocclan1.png' width="500"/> <br />
-<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cocclan2.png' width="500"/>
+<img src='https://res.cloudinary.com/clashstats/image/upload/c_mfit,h_284,w_500/v1640840697/readme/cocclan1_k61zxg.png'/> <br />
+<img src='https://res.cloudinary.com/clashstats/image/upload/c_mfit,h_592,w_500/v1640840699/readme/cocclan2_aywfyq.png' />
 
 ### coc graph
 
 This command requires user verification before use. The user's saved trophy data will be plotted (via matplotlib) on a line graph. New data can only be saved once daily, but the graph can be seen as many times as prompted. 
 
-<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cocgraph.png' width="600" height="500" />
+<img src='https://res.cloudinary.com/clashstats/image/upload/c_scale,h_441,w_500/v1640840698/readme/cocgraph_irhmss.png' />
 
 ### coc hero
 
 This command fetches the hero levels of each hero the player has. In the future, this should include how far the player is from maxing out their heroes for their Town Hall level. Requires verification.
 
-<img src='https://raw.githubusercontent.com/CodingPenguin/clashofclans-bot/main/images/cochero.png' width="600" height="700" />
+<img src='https://res.cloudinary.com/clashstats/image/upload/c_mfit,h_541,w_500/v1640840698/readme/cochero_uw5vcu.png' />
 
 ### coc zap
 
