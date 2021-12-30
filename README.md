@@ -1,10 +1,8 @@
-# Clash of Clans Discord Bot (CoC Bot)
-
-This bot is used to fetch in-game player data by using the official [Clash of Clans API](https://developer.clashofclans.com/#/documentation). CoC Bot is still under testing and some features have yet to be implemented. Suggestions are encouraged!
+This bot is used to fetch in-game player data by using the official [Clash of Clans API](https://developer.clashofclans.com/#/documentation). ClashStats Bot is still under testing and some features have yet to be implemented. Suggestions are encouraged!
 
 ## Commands
 
-Currently, eight commands are able to be used.
+Currently, nine commands are able to be used.
 
 ### coc verify
 
@@ -18,7 +16,7 @@ coc stats #GY2GJLCP
 ```
 When ran, and the user has already been verified, no additional arguments are required.
 
-<img src='https://res.cloudinary.com/clashstats/image/upload/c_mfit,h_500,w_500/v1640840697/readme/cocstats_jbbfow.png' />
+<img src='https://res.cloudinary.com/clashstats/image/upload/c_mfit,h_500,w_500/v1640840697/readme/cocstats_jbbfow.png' width='500' height='500'/>
 
 ### coc clan
 
@@ -34,20 +32,20 @@ coc clan
 
 And if you're curious what metrics are shown, here are some images! <br />
 
-<img src='https://res.cloudinary.com/clashstats/image/upload/c_mfit,h_284,w_500/v1640840697/readme/cocclan1_k61zxg.png'/> <br />
-<img src='https://res.cloudinary.com/clashstats/image/upload/c_mfit,h_592,w_500/v1640840699/readme/cocclan2_aywfyq.png' />
+<img src='https://res.cloudinary.com/clashstats/image/upload/c_mfit,h_284,w_500/v1640840697/readme/cocclan1_k61zxg.png' width="500" height="284" /> <br />
+<img src='https://res.cloudinary.com/clashstats/image/upload/c_mfit,h_592,w_500/v1640840699/readme/cocclan2_aywfyq.png' width='500' height='592' />
 
 ### coc graph
 
 This command requires user verification before use. The user's saved trophy data will be plotted (via matplotlib) on a line graph. New data can only be saved once daily, but the graph can be seen as many times as prompted. 
 
-<img src='https://res.cloudinary.com/clashstats/image/upload/c_scale,h_441,w_500/v1640840698/readme/cocgraph_irhmss.png' />
+<img src='https://res.cloudinary.com/clashstats/image/upload/c_scale,h_441,w_500/v1640840698/readme/cocgraph_irhmss.png' width='500' height='441' />
 
 ### coc hero
 
-This command fetches the hero levels of each hero the player has. In the future, this should include how far the player is from maxing out their heroes for their Town Hall level. Requires verification.
+This command requires verification before use. Lists your hero levels. Tells how far you are from maxed hero levels at your Town Hall level.
 
-<img src='https://res.cloudinary.com/clashstats/image/upload/c_mfit,h_541,w_500/v1640840698/readme/cochero_uw5vcu.png' />
+<img src='https://res.cloudinary.com/clashstats/image/upload/c_mfit,h_541,w_500/v1640840698/readme/cochero_uw5vcu.png' width='500' height='541' />
 
 ### coc zap
 
@@ -64,6 +62,10 @@ This command requires three parameters: the air defense level and a lightning sp
 ```
 coc zapquake [air defense level] [lightning spell level] [earthquake spell level]
 ```
+
+### coc invite
+
+Fetches the permanent Discord invite link for ClashStats.
 
 ### coc help
 
