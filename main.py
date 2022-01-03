@@ -39,7 +39,7 @@ async def _coc(ctx: SlashContext):
     )
     
     await ctx.send(embed=embed)
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(bot.guilds)} servers"))
+    # await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(bot.guilds)} servers"))
     
     
 @slash.slash(name='help', description='Displays the command list.', guild_ids=GUILD_IDS)
@@ -430,7 +430,7 @@ async def _zapquake(ctx: SlashContext, airdef, zap, quake):
 @bot.event
 async def on_ready():
     logger.info(f'We have logged in as {bot.user}')    
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(bot.guilds)} servers"))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="coc help"))
     
     
 @bot.event
@@ -449,7 +449,7 @@ async def on_message(message):
         coroutines.append(message.channel.send(
             embed=coc_embed
         ))
-        coroutines.append(bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(bot.guilds)} servers")))
+        # coroutines.append(bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(bot.guilds)} servers")))
         await asyncio.gather(*coroutines)
     
     await bot.process_commands(message)
