@@ -7,3 +7,4 @@ PROXIES = {
     "https": os.environ.get('QUOTAGUARD_STATIC_URL')
 }   
 MONGO_SRV_URL = os.environ.get('MONGO_SRV_URL')
+GUILD_IDS = [870099254608281710]
