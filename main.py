@@ -20,9 +20,6 @@ from helpers.clan import fetch_clan_contents, send_clan_contents, set_default_cl
 from helpers.zap import set_zap_embed
 from helpers.zapquake import set_zapquake_embed
 
-intents = discord.Intents.default()
-intents.members = True
-
 mongo_client = MongoClient(MONGO_SRV_URL)
 db = mongo_client.coc
 col = db.users
@@ -33,7 +30,9 @@ slash = SlashCommand(bot, sync_commands=True)
 @slash.slash(name="coc", description='Greets you.', guild_ids=GUILD_IDS)
 async def coc(ctx: SlashContext):
     logger.info('coc')
-    
+    GUILD_IDS = list([guild.id for guild in bot.guilds])
+    logger.debug(GUILD_IDS)
+
     embed = Embed(
         title='ClashStats',
         description=f"Hello {ctx.author.name}!\nDid you know I'm on **{len(bot.guilds)}** Discord servers?\nAlso, there are **{col.count_documents({})}** verified users using me. I'm more popular than you!",
