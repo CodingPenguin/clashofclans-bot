@@ -1,5 +1,5 @@
 import discord, requests, asyncio
-from env import API_KEY, PROXIES, TOKEN, MONGO_SRV_URL
+from env import API_KEY, PROXIES, TOKEN, MONGO_SRV_URL, GUILD_IDS
 
 from pymongo import MongoClient
 from datetime import date
@@ -8,6 +8,9 @@ from loguru import logger
 from discord.embeds import Embed
 from discord.errors import HTTPException
 from discord.ext import commands
+from discord import Client, Intents, Embed
+from discord_slash import SlashCommand, SlashContext
+from discord_slash.utils.manage_commands import create_option
 
 from helpers.constants import BH_HEROES, TH_HEROES
 from helpers.graph import plot_trophy_graph, set_graph_embed
@@ -24,39 +27,24 @@ mongo_client = MongoClient(MONGO_SRV_URL)
 db = mongo_client.coc
 col = db.users
 
-client = commands.Bot(command_prefix='coc ', intents=intents, help_command=None)
+bot = Client(intents=Intents.default())
+slash = SlashCommand(bot, sync_commands=True)
 
-
-@client.event
-async def on_ready():
-    logger.info(f'We have logged in as {client.user}')    
-    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(client.guilds)} servers"))
+@slash.slash(name="coc", description='Greets you.', guild_ids=GUILD_IDS)
+async def coc(ctx: SlashContext):
+    logger.info('coc')
+    
+    embed = Embed(
+        title='ClashStats',
+        description=f"Hello {ctx.author.name}!\nDid you know I'm on **{len(bot.guilds)}** Discord servers?\nAlso, there are **{col.count_documents({})}** verified users using me. I'm more popular than you!",
+    )
+    
+    await ctx.send(embed=embed)
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(bot.guilds)} servers"))
     
     
-@client.event
-async def on_message(message):   
-    if message.author == client.user:
-        return
-
-    if message.content == "coc":
-        logger.info('coc')
-        coroutines = []
-        coc_embed = Embed(
-            title="ClashStats",
-            description=f"Hello {message.author.name}!\nDid you know I'm on **{len(client.guilds)}** Discord servers?\nAlso, there are **{col.count_documents({})}** verified users using me. I'm more popular than you!",
-            color=0x000000
-        )
-        coroutines.append(message.channel.send(
-            embed=coc_embed
-        ))
-        coroutines.append(client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(client.guilds)} servers")))
-        await asyncio.gather(*coroutines)
-    
-    await client.process_commands(message)
-
-
-@client.command()
-async def help(ctx):
+@slash.slash(name='help', description='Displays the command list.', guild_ids=GUILD_IDS)
+async def help(ctx: SlashContext):
     logger.info('help')
     
     help_contents = []
@@ -107,7 +95,7 @@ async def help(ctx):
         
     while True:
         try:
-            reaction, user = await client.wait_for("reaction_add", timeout=120, check=check)
+            reaction, user = await bot.wait_for("reaction_add", timeout=120, check=check)
 
             if str(reaction.emoji) == "▶️" and cur_page != pages:
                 cur_page += 1
@@ -124,11 +112,10 @@ async def help(ctx):
         except asyncio.TimeoutError:
             await message.clear_reactions()
             break   
-     
-     
+        
 
-@client.command()
-async def invite(ctx):
+@slash.slash(name='invite', description='Get the ClashStats invite link.', guild_ids=GUILD_IDS)
+async def invite(ctx: SlashContext):
     logger.info('invite')
     invite_embed = Embed(
         title="Invite me to your server!",
@@ -138,8 +125,20 @@ async def invite(ctx):
     await ctx.send(embed=invite_embed)
     
     
-@client.command()
-async def stats(ctx, tag: str=None):
+@slash.slash(
+    name='stats',
+    description='Get player stats.',
+    options=[
+        create_option(
+            name='tag',
+            description='Your player tag',
+            option_type=3,
+            required=False
+        )
+    ],
+    guild_ids=GUILD_IDS
+)
+async def stats(ctx: SlashContext, tag: str=None):
     logger.info('stats')
     
     author_id = str(ctx.author.id)
@@ -157,8 +156,8 @@ async def stats(ctx, tag: str=None):
     await ctx.send(embed=get_stats_embed(tag))
     
     
-@client.command()
-async def verify(ctx):
+@slash.slash(name='verify', description='Link your Discord profile to your Clash of Clans account.', guild_ids=GUILD_IDS)
+async def verify(ctx: SlashContext):
     logger.info('verify')
     
     author_id = str(ctx.author.id)
@@ -169,9 +168,9 @@ async def verify(ctx):
 
     def check(msg) -> bool:
         return msg.author == ctx.author and str(msg.channel.type) == "private"
-    
+
     await ctx.author.send("Enter your in-game player tag followed by a space and then your player token!\nFor example: `#IN-GAME-PLAYERTAG apitoken`\nYour API token can be found in-game. Gear Icon -> More Settings -> Tap 'Show' to see API token")
-    user_data = await client.wait_for("message", check=check)
+    user_data = await bot.wait_for("message", check=check)
     user_tag = user_data.content.split(' ')[0].replace('#', '%23')
     user_token = user_data.content.split(' ')[1]
     
@@ -208,8 +207,8 @@ async def verify(ctx):
     elif 'status' not in res:
         await ctx.author.send("There was an error with the Clash of Clans API. Please try again later, or report this issue in the support server.")
             
-@client.command()
-async def graph(ctx):
+@slash.slash(name='graph', description='Graphs your daily trophy count.', guild_ids=GUILD_IDS)
+async def graph(ctx: SlashContext):
     logger.info('graph')
     
     author_id = str(ctx.author.id)
@@ -248,8 +247,8 @@ async def graph(ctx):
     file = discord.File("./graph.png", filename="graph.png")
     await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
     
-
-@client.command()
+    
+@slash.slash(name='hero', description='Get your hero stats.', guild_ids=GUILD_IDS)
 async def hero(ctx):
     logger.info('hero')
     
@@ -315,9 +314,20 @@ async def hero(ctx):
         )
         
     await ctx.send(embed=embed_var)
-    
 
-@client.command()
+@slash.slash(
+    name='clan',
+    description='Get clan stats.',
+    options=[
+        create_option(
+            name='clan_tag',
+            description='Clan tag',
+            option_type=3,
+            required=False,
+        )
+    ],
+    guild_ids=GUILD_IDS
+)
 async def clan(ctx, clan_tag: str=''):
     logger.info('clan')
     author_id = str(ctx.author.id)
@@ -332,7 +342,7 @@ async def clan(ctx, clan_tag: str=''):
         contents = await fetch_clan_contents(clan_tag)
     elif len(clan_tag):
         try:
-            contents = await set_default_clan(client, ctx, clan_tag, author_id)  
+            contents = await set_default_clan(bot, ctx, clan_tag, author_id)  
         except Exception as e:
             await ctx.send(e)
     else:
@@ -340,20 +350,35 @@ async def clan(ctx, clan_tag: str=''):
         await ctx.send(embed=error_embed)
     
     try:
-        await send_clan_contents(client, ctx, contents)
+        await send_clan_contents(bot, ctx, contents)
     except Exception as e:
         logger.error(f'ERROR: {e}')
         
         
-@client.command()
-async def zap(ctx, airdef="0", zap="0"):
+@slash.slash(
+    name='zap',
+    description='Check how many lightning spells it takes to destroy an air defense.',
+    options=[
+        create_option(
+            name='airdef',
+            description='Air Defense Level',
+            option_type=4,
+            required=True
+        ),
+        create_option(
+            name='zap',
+            description='Lightning Spell Level',
+            option_type=4,
+            required=True
+        )
+    ],
+    guild_ids=GUILD_IDS
+)
+async def zap(ctx: SlashContext, airdef, zap):
     logger.info('zap')
     
-    try:
-        airdef = int(airdef)
-        zap = int(zap)
-    except Exception:
-        await ctx.send("Please enter valid air defense and/or lightning spell levels. You didn't put in numbers.")
+    airdef = int(airdef)
+    zap = int(zap)
         
     if (airdef < 1 or airdef > 12) or (zap < 1 or zap > 9):
         await ctx.send("Please enter valid air defense and/or lightning spell levels. Ex: coc zap [air defense level] [lightning spell level]")
@@ -362,16 +387,38 @@ async def zap(ctx, airdef="0", zap="0"):
     embed_var = await set_zap_embed(airdef, zap)
     await ctx.send(embed=embed_var)
     
-    
-@client.command()
-async def zapquake(ctx, airdef="0", zap="0", quake="0"):
+
+@slash.slash(
+    name='zapquake',
+    description='Check how many lightning and earthquake spells it takes to destroy an air defense.',
+    options=[
+        create_option(
+            name='airdef',
+            description='Air Defense Level',
+            option_type=4,
+            required=True
+        ),
+        create_option(
+            name='zap',
+            description='Lightning Spell Level',
+            option_type=4,
+            required=True
+        ),
+        create_option(
+            name='quake',
+            description='Earthquake Spell Level',
+            option_type=4,
+            required=True
+        )        
+    ],
+    guild_ids=GUILD_IDS
+)
+async def zapquake(ctx: SlashContext, airdef, zap, quake):
     logger.info('zapquake')
-    try:
-        airdef = int(airdef)
-        zap = int(zap)
-        quake = int(quake)
-    except Exception:
-        await ctx.send("Please enter valid air defense, lightning spell, and/or earthquake spell levels. You didn't put in numbers.")
+    
+    airdef = int(airdef)
+    zap = int(zap)
+    quake = int(quake)
         
     if (airdef < 1 or airdef > 12) or (zap < 1 or zap > 9) or (quake < 1 or quake > 5):
         await ctx.send("Please enter valid air defense, lightning spell levels, and/or earthquake spell levels. Ex: coc zapquake [air defense level] [lightning spell level] [earthquake spell level]")
@@ -379,8 +426,7 @@ async def zapquake(ctx, airdef="0", zap="0", quake="0"):
     
     embed_var = await set_zapquake_embed(airdef, zap, quake)
     await ctx.send(embed=embed_var)
-
-
+    
+    
 if __name__ == '__main__':
-    client.run(TOKEN)
-
+    bot.run(TOKEN)
