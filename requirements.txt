@@ -12,7 +12,6 @@ charset-normalizer==2.0.3
 click==8.0.3
 colorama==0.4.4
 cycler==0.10.0
-discord-py-interactions==4.0.1
 discord-py-slash-command==3.0.3
 discord.py==1.7.3
 distlib==0.3.4
