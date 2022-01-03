@@ -27,11 +27,10 @@ col = db.users
 bot = commands.Bot(command_prefix='coc ',intents=Intents.default(), help_command=None)
 slash = SlashCommand(bot, sync_commands=True)
 
-@slash.slash(name="coc", description='Greets you.', guild_ids=GUILD_IDS)
+
+@slash.slash(name="coc", description='Greets you.')
 async def _coc(ctx: SlashContext):
     logger.info('coc')
-    GUILD_IDS = list([guild.id for guild in bot.guilds])
-    logger.debug(GUILD_IDS)
 
     embed = Embed(
         title='ClashStats',
@@ -42,7 +41,7 @@ async def _coc(ctx: SlashContext):
     # await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(bot.guilds)} servers"))
     
     
-@slash.slash(name='help', description='Displays the command list.', guild_ids=GUILD_IDS)
+@slash.slash(name='help', description='Displays the command list.')
 async def _help(ctx: SlashContext):
     logger.info('help')
     
@@ -113,7 +112,7 @@ async def _help(ctx: SlashContext):
             break   
         
 
-@slash.slash(name='invite', description='Get the ClashStats invite link.', guild_ids=GUILD_IDS)
+@slash.slash(name='invite', description='Get the ClashStats invite link.')
 async def _invite(ctx: SlashContext):
     logger.info('invite')
     invite_embed = Embed(
@@ -134,8 +133,7 @@ async def _invite(ctx: SlashContext):
             option_type=3,
             required=False
         )
-    ],
-    guild_ids=GUILD_IDS
+    ]
 )
 async def _stats(ctx: SlashContext, tag: str=None):
     logger.info('stats')
@@ -155,7 +153,7 @@ async def _stats(ctx: SlashContext, tag: str=None):
     await ctx.send(embed=get_stats_embed(tag))
     
     
-@slash.slash(name='verify', description='Link your Discord profile to your Clash of Clans account.', guild_ids=GUILD_IDS)
+@slash.slash(name='verify', description='Link your Discord profile to your Clash of Clans account.')
 async def _verify(ctx: SlashContext):
     logger.info('verify')
     
@@ -206,7 +204,7 @@ async def _verify(ctx: SlashContext):
     elif 'status' not in res:
         await ctx.author.send("There was an error with the Clash of Clans API. Please try again later, or report this issue in the support server.")
             
-@slash.slash(name='graph', description='Graphs your daily trophy count.', guild_ids=GUILD_IDS)
+@slash.slash(name='graph', description='Graphs your daily trophy count.')
 async def _graph(ctx: SlashContext):
     logger.info('graph')
     
@@ -247,7 +245,7 @@ async def _graph(ctx: SlashContext):
     await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
     
     
-@slash.slash(name='hero', description='Get your hero stats.', guild_ids=GUILD_IDS)
+@slash.slash(name='hero', description='Get your hero stats.')
 async def _hero(ctx):
     logger.info('hero')
     
@@ -324,8 +322,7 @@ async def _hero(ctx):
             option_type=3,
             required=False,
         )
-    ],
-    guild_ids=GUILD_IDS
+    ]
 )
 async def _clan(ctx, clan_tag: str=''):
     logger.info('clan')
@@ -370,8 +367,7 @@ async def _clan(ctx, clan_tag: str=''):
             option_type=4,
             required=True
         )
-    ],
-    guild_ids=GUILD_IDS
+    ]
 )
 async def _zap(ctx: SlashContext, airdef, zap):
     logger.info('zap')
@@ -409,8 +405,7 @@ async def _zap(ctx: SlashContext, airdef, zap):
             option_type=4,
             required=True
         )        
-    ],
-    guild_ids=GUILD_IDS
+    ]
 )
 async def _zapquake(ctx: SlashContext, airdef, zap, quake):
     logger.info('zapquake')
