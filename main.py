@@ -160,7 +160,12 @@ async def _verify(ctx: SlashContext):
     author_id = str(ctx.author.id)
     selector = {'_id': author_id}
     if col.find_one(selector) is not None:
-        await ctx.send("You are already verified!")
+        embed_var = Embed(
+        title="Already verified!",
+        description=f"**{ctx.author.name}**, you're good to go! No further verification needed.",
+        color=0x32C12C
+        )
+        await ctx.send(embed=embed_var)
         return
 
     def check(msg) -> bool:
@@ -168,8 +173,13 @@ async def _verify(ctx: SlashContext):
 
     await ctx.author.send("Enter your in-game player tag followed by a space and then your player token!\nFor example: `#IN-GAME-PLAYERTAG apitoken`\nYour API token can be found in-game. Gear Icon -> More Settings -> Tap 'Show' to see API token")
     user_data = await bot.wait_for("message", check=check)
-    user_tag = user_data.content.split(' ')[0].replace('#', '%23')
-    user_token = user_data.content.split(' ')[1]
+    try:
+        user_tag = user_data.content.split(' ')[0].replace('#', '%23')
+        user_token = user_data.content.split(' ')[1]
+    except:
+        error_embed = Embed(title='Input Error', description='Please try verifying again in the server you ran this command in!', color=0xFF0000)
+        await ctx.author.send(embed=error_embed)
+        await ctx.send(embed=error_embed)
     
     url = f'https://api.clashofclans.com/v1/players/{user_tag}/verifytoken'
     token_data = {
@@ -208,6 +218,7 @@ async def _verify(ctx: SlashContext):
         error_embed = Embed(title='API Error', description='There was an error with the Clash of Clans API. Please try again later, or report this issue in the support server.', color=0xFF0000)
         await ctx.author.send(embed=error_embed)
         await ctx.send(embed=error_embed)
+        
         
 @slash.slash(name='graph', description='Graphs your daily trophy count.')
 async def _graph(ctx: SlashContext):
@@ -316,6 +327,7 @@ async def _hero(ctx):
         )
         
     await ctx.send(embed=embed_var)
+
 
 @slash.slash(
     name='clan',
@@ -564,7 +576,12 @@ async def verify(ctx):
     author_id = str(ctx.author.id)
     selector = {'_id': author_id}
     if col.find_one(selector) is not None:
-        await ctx.send("You are already verified!")
+        embed_var = Embed(
+        title="Already verified!",
+        description=f"**{ctx.author.name}**, you're good to go! No further verification needed.",
+        color=0x32C12C
+        )
+        await ctx.send(embed=embed_var)
         return
 
     def check(msg) -> bool:
@@ -572,8 +589,13 @@ async def verify(ctx):
 
     await ctx.author.send("Enter your in-game player tag followed by a space and then your player token!\nFor example: `#IN-GAME-PLAYERTAG apitoken`\nYour API token can be found in-game. Gear Icon -> More Settings -> Tap 'Show' to see API token")
     user_data = await bot.wait_for("message", check=check)
-    user_tag = user_data.content.split(' ')[0].replace('#', '%23')
-    user_token = user_data.content.split(' ')[1]
+    try:
+        user_tag = user_data.content.split(' ')[0].replace('#', '%23')
+        user_token = user_data.content.split(' ')[1]
+    except:
+        error_embed = Embed(title='Input Error', description='Please try verifying again in the server you ran this command in!', color=0xFF0000)
+        await ctx.author.send(embed=error_embed)
+        await ctx.send(embed=error_embed)
     
     url = f'https://api.clashofclans.com/v1/players/{user_tag}/verifytoken'
     token_data = {
