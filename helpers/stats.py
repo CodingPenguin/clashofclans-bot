@@ -56,9 +56,13 @@ def set_stats_embed(embed_data: dict[str]) -> discord.Embed:
         value=f"{embed_data['clan_name']} ({embed_data['clan_tag']})",
         inline=False
     )
+    if embed_data['donations_received'] == 0:
+        donation_ratio = f"{embed_data['donations']} ({embed_data['donations']}/{embed_data['donations_received']})"
+    else:
+        donation_ratio = f"{round(embed_data['donations']/embed_data['donations_received'], 3)} ({embed_data['donations']}/{embed_data['donations_received']})"
     embed_var.add_field(
         name="Donation Ratio 🤲",
-        value=f"{round(embed_data['donations']/embed_data['donations_received'], 3)} ({embed_data['donations']}/{embed_data['donations_received']})",
+        value=donation_ratio,
         inline=False
     )
     embed_var.add_field(
