@@ -27,11 +27,18 @@ async def fetch_clan_stats(clan_tag: str):
         'authorization': f'Bearer {API_KEY}',
         'Content-Type': 'application/json'
     }
-    
-    response = requests.get(url, headers=headers, proxies=PROXIES)
-    response.raise_for_status()
-    res = response.json()
-    res = ClanBase(**res)
+    try:
+        response = requests.get(url, headers=headers, proxies=PROXIES)
+        res = response.json()
+        res = ClanBase(**res)
+    except HTTPException as e:
+        raise HTTPException('There was an error with the Clash of Clans API, or invalid clan tag. Please try again later.')
+    except ValidationError as e:
+        logger.error(f'ERROR: {e}')
+        raise ValidationError('Clash of Clans API is provided invalid response. Please try again later.')
+    except Exception as e:
+        logger.error(f'ERROR: {e}')
+        raise Exception(e)
     
     return json.loads(res.json())
 
@@ -40,15 +47,13 @@ async def fetch_clan_contents(clan_tag):
     try:
         clan_stats = await fetch_clan_stats(clan_tag)
     except HTTPException as e:
-        logger.error(f'ERROR: {e}')
         raise HTTPException('There was an error with the Clash of Clans API, or invalid clan tag. Please try again later.')
     except ValidationError as e:
         logger.error(f'ERROR: {e}')
         raise ValidationError('Clash of Clans API is provided invalid response. Please try again later.')
-    except ClientException as e:
+    except Exception as e:
         logger.error(f'ERROR: {e}')
-        raise ClientException(e)
-    
+        raise Exception('There was an error. You may have typed in an invalid clan tag. Please try again.')
     contents = []
     contents.append(fetch_general_clan_stats(clan_stats))
     contents.append(fetch_member_stats(clan_stats))
@@ -60,7 +65,8 @@ async def fetch_clan_contents(clan_tag):
         contents.extend(leaderboards)
     except Exception as e:
         logger.error(f'ERROR: {e}')
-        
+        raise Exception(e)
+    
     return contents
     
     
@@ -88,7 +94,13 @@ async def set_default_clan(client, ctx, clan_tag, author_id):
     try:
         contents = await fetch_clan_contents(clan_tag)
     except Exception as e:
-        raise Exception('An error occurred. Assure you have a valid clan tag, though it may be an issue with Clash of Clans API. Please try again.')
+        embed = Embed(
+            title='Error',
+            description=e,
+            color=0xFF0000
+        )
+        await ctx.send(embed=embed)
+        return
     
     save_embed = Embed(
         title='Default Clan?',
