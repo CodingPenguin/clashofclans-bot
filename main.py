@@ -156,7 +156,7 @@ async def _stats(ctx: SlashContext, tag: str=None):
 @slash.slash(name='verify', description='Link your Discord profile to your Clash of Clans account.')
 async def _verify(ctx: SlashContext):
     logger.info('verify')
-    
+    await ctx.defer()
     author_id = str(ctx.author.id)
     selector = {'_id': author_id}
     if col.find_one(selector) is not None:
@@ -187,10 +187,9 @@ async def _verify(ctx: SlashContext):
             headers=headers,
             proxies=PROXIES
         )
-        response.raise_for_status()
     except HTTPException as e:
         print('error: ', e)
-        await ctx.send("There was an error with the server. Please try again.")
+        await ctx.author.send("There was an error with the server. Please try again.")
         
     res = response.json()
     if 'status' in res:
@@ -198,9 +197,11 @@ async def _verify(ctx: SlashContext):
             write_to_db(author_id, user_tag) # async 1
             embed_var = set_verify_embed(ctx.author.name) # async 2
             await ctx.send(embed=embed_var) # async 3
-            await ctx.author.send("Verified!") # send verified in dm, async 4
+            await ctx.author.send(embed=embed_var) # send verified in dm, async 4
         elif res['status'] == 'invalid':
-            await ctx.author.send("Please try again by saying `coc verify` in the server. Check for typos.")
+            await ctx.author.send("Please try again by running `/verify` in the server. Check for typos.")
+            error_embed = Embed(title='Input Error', description='Please try verifying again!', color=0xFF0000)
+            await ctx.send(embed=error_embed)
     elif 'status' not in res:
         await ctx.author.send("There was an error with the Clash of Clans API. Please try again later, or report this issue in the support server.")
             
@@ -342,7 +343,7 @@ async def _clan(ctx, clan_tag: str=''):
         except Exception as e:
             await ctx.send(e)
     else:
-        error_embed = Embed(title='Input Error', description='Please enter a clan tag!', color=0xFF0000)
+        error_embed = Embed(title='Input Error', description='Please try verifying again!', color=0xFF0000)
         await ctx.send(embed=error_embed)
     
     try:
@@ -586,7 +587,6 @@ async def verify(ctx):
             headers=headers,
             proxies=PROXIES
         )
-        response.raise_for_status()
     except HTTPException as e:
         print('error: ', e)
         await ctx.send("There was an error with the server. Please try again.")
@@ -597,9 +597,11 @@ async def verify(ctx):
             write_to_db(author_id, user_tag) # async 1
             embed_var = set_verify_embed(ctx.author.name) # async 2
             await ctx.send(embed=embed_var) # async 3
-            await ctx.author.send("Verified!") # send verified in dm, async 4
+            await ctx.author.send(embed=embed_var) # send verified in dm, async 4
         elif res['status'] == 'invalid':
-            await ctx.author.send("Please try again by saying `coc verify` in the server. Check for typos.")
+            await ctx.author.send("Please try again by running `/verify` in the server. Check for typos.")
+            error_embed = Embed(title='Input Error', description='Please try verifying again!', color=0xFF0000)
+            await ctx.send(embed=error_embed)
     elif 'status' not in res:
         await ctx.author.send("There was an error with the Clash of Clans API. Please try again later, or report this issue in the support server.")
             
