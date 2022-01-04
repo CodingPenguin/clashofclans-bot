@@ -189,22 +189,26 @@ async def _verify(ctx: SlashContext):
         )
     except HTTPException as e:
         print('error: ', e)
-        await ctx.author.send("There was an error with the server. Please try again.")
+        error_embed = Embed(title='Request Error', description='There was an error with the server. Please try again.', color=0xFF0000)
+        await ctx.author.send(embed=error_embed)
+        await ctx.send(embed=error_embed)
         
     res = response.json()
     if 'status' in res:
         if res['status'] == 'ok':
             write_to_db(author_id, user_tag) # async 1
             embed_var = set_verify_embed(ctx.author.name) # async 2
-            await ctx.send(embed=embed_var) # async 3
             await ctx.author.send(embed=embed_var) # send verified in dm, async 4
+            await ctx.send(embed=embed_var) # async 3
         elif res['status'] == 'invalid':
-            await ctx.author.send("Please try again by running `/verify` in the server. Check for typos.")
-            error_embed = Embed(title='Input Error', description='Please try verifying again!', color=0xFF0000)
+            error_embed = Embed(title='Input Error', description='Please try verifying again in the server you ran this command in!', color=0xFF0000)
+            await ctx.author.send(embed=error_embed)
             await ctx.send(embed=error_embed)
     elif 'status' not in res:
-        await ctx.author.send("There was an error with the Clash of Clans API. Please try again later, or report this issue in the support server.")
-            
+        error_embed = Embed(title='API Error', description='There was an error with the Clash of Clans API. Please try again later, or report this issue in the support server.', color=0xFF0000)
+        await ctx.author.send(embed=error_embed)
+        await ctx.send(embed=error_embed)
+        
 @slash.slash(name='graph', description='Graphs your daily trophy count.')
 async def _graph(ctx: SlashContext):
     logger.info('graph')
@@ -556,7 +560,7 @@ async def stats(ctx, tag: str=None):
 @bot.command()
 async def verify(ctx):
     logger.info('verify')
-    
+
     author_id = str(ctx.author.id)
     selector = {'_id': author_id}
     if col.find_one(selector) is not None:
@@ -565,7 +569,7 @@ async def verify(ctx):
 
     def check(msg) -> bool:
         return msg.author == ctx.author and str(msg.channel.type) == "private"
-    
+
     await ctx.author.send("Enter your in-game player tag followed by a space and then your player token!\nFor example: `#IN-GAME-PLAYERTAG apitoken`\nYour API token can be found in-game. Gear Icon -> More Settings -> Tap 'Show' to see API token")
     user_data = await bot.wait_for("message", check=check)
     user_tag = user_data.content.split(' ')[0].replace('#', '%23')
@@ -589,21 +593,25 @@ async def verify(ctx):
         )
     except HTTPException as e:
         print('error: ', e)
-        await ctx.send("There was an error with the server. Please try again.")
+        error_embed = Embed(title='Request Error', description='There was an error with the server. Please try again.', color=0xFF0000)
+        await ctx.author.send(embed=error_embed)
+        await ctx.send(embed=error_embed)
         
     res = response.json()
     if 'status' in res:
         if res['status'] == 'ok':
             write_to_db(author_id, user_tag) # async 1
             embed_var = set_verify_embed(ctx.author.name) # async 2
-            await ctx.send(embed=embed_var) # async 3
             await ctx.author.send(embed=embed_var) # send verified in dm, async 4
+            await ctx.send(embed=embed_var) # async 3
         elif res['status'] == 'invalid':
-            await ctx.author.send("Please try again by running `/verify` in the server. Check for typos.")
-            error_embed = Embed(title='Input Error', description='Please try verifying again!', color=0xFF0000)
+            error_embed = Embed(title='Input Error', description='Please try verifying again in the server you ran this command in!', color=0xFF0000)
+            await ctx.author.send(embed=error_embed)
             await ctx.send(embed=error_embed)
     elif 'status' not in res:
-        await ctx.author.send("There was an error with the Clash of Clans API. Please try again later, or report this issue in the support server.")
+        error_embed = Embed(title='API Error', description='There was an error with the Clash of Clans API. Please try again later, or report this issue in the support server.', color=0xFF0000)
+        await ctx.author.send(embed=error_embed)
+        await ctx.send(embed=error_embed)
             
 @bot.command()
 async def graph(ctx):
