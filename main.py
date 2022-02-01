@@ -212,10 +212,12 @@ async def _verify(ctx: SlashContext):
             embed_var = set_verify_embed(ctx.author.name) # async 2
             await ctx.author.send(embed=embed_var) # send verified in dm, async 4
             await ctx.send(embed=embed_var) # async 3
+            
         elif res['status'] == 'invalid':
             error_embed = Embed(title='Input Error', description='Please try verifying again in the server you ran this command in!', color=0xFF0000)
             await ctx.author.send(embed=error_embed)
             await ctx.send(embed=error_embed)
+            
     elif 'status' not in res:
         error_embed = Embed(title='API Error', description='There was an error with the Clash of Clans API. Please try again later, or report this issue in the support server.', color=0xFF0000)
         await ctx.author.send(embed=error_embed)
@@ -262,6 +264,69 @@ async def _graph(ctx: SlashContext):
     file = discord.File("./graph.png", filename="graph.png")
     await ctx.send(file=file, embed=set_graph_embed(ctx.author.name))
     
+    
+@slash.slash(name='destroy', description='Destroy your data from ClashStats.')
+async def _destroy(ctx: SlashContext):
+    await ctx.defer()
+    author_id = str(ctx.author.id)
+    selector = {'_id': author_id}
+    
+    if (user := col.find_one(selector)) is None:
+        embed_var = Embed(
+            title="You don't have any data with us!",
+            description=f"**{ctx.author.name}**, you're good to go!",
+            color=0x32C12C
+        )
+        await ctx.send(embed=embed_var)
+        return
+
+    def check(msg) -> bool:
+        return msg.author == ctx.author and str(msg.channel.type) == "private"
+
+    await ctx.author.send("Please type your in-game user tag to confirm this decision! Ex: #ABCDEFGH")
+    user_res = await bot.wait_for("message", check=check)
+    
+    if 'player_tag' not in user:
+        embed_var = Embed(
+            title="There was an error.",
+            description=f"**{ctx.author.name}**, please join the support server. We weren't able to delete your data.",
+            color=0xFF0000
+        )
+        await ctx.author.send(embed=embed_var)
+        await ctx.send(embed=embed_var)
+        return
+
+    user_content = str(user_res.content).replace('#', '%23')
+    if user_content == user['player_tag']:
+        deletion_selector = {'_id': user['_id']}
+        try:
+            col.delete_one(deletion_selector)
+            embed_var = Embed(
+                title="Successfully deleted!",
+                description=f"**{ctx.author.name}**, you're good to go!",
+                color=0x32C12C
+            )
+            await ctx.author.send(embed=embed_var)
+            await ctx.send(embed=embed_var)
+            return
+        except:
+            embed_var = Embed(
+                title="There was an error.",
+                description=f"**{ctx.author.name}**, please join the support server. We weren't able to delete your data.",
+                color=0xFF0000
+            )
+            await ctx.author.send(embed=embed_var)
+            await ctx.send(embed=embed_var)
+            return
+    
+    embed_var = Embed(
+        title="There was an error.",
+        description=f"**{ctx.author.name}**, you did not type in the correct player tag. Please try again.",
+        color=0xFF0000
+    )
+    await ctx.author.send(embed=embed_var)
+    await ctx.send(embed=embed_var)
+    return
     
 @slash.slash(name='hero', description='Get your hero stats.')
 async def _hero(ctx):
