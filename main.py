@@ -67,7 +67,8 @@ async def _help(ctx: SlashContext):
     help1.add_field(name="`hero`", value="Lists your hero levels.\nTells how far you are from maxed hero levels at your Town Hall level.\nOnly available once you have verified using /verify.\nEx: /hero", inline=False)
     help1.add_field(name="`zap`", value="Tells the player how many lightning spells are required to destroy an air defense.\nThis command requires two parameters: the air defense level and your lightning spell level.\nEx: /zap [air defense level] [lightning spell level]", inline=False)
     help1.add_field(name="`zapquake`", value="Tells the player how many lightning and earthquake spells are required to destroy an air defense.\nThis command requires three parameters: the air defense level and a lightning spell level, and an earthquake spell level.\nEx: /zapquake [air defense level] [lightning spell level] [earthquake spell level]", inline=False)
-    help1.add_field(name='`invite`', value="Fetches the permanent ClashStats Discord invite link.", inline=False)
+    help1.add_field(name="`destroy`", value="Destroy your data from ClashStats. We will no longer hold your data in our database. This decision is permanent and cannot be undone!", inline=False)
+    help1.add_field(name="`invite`", value="Fetches the permanent ClashStats Discord invite link.", inline=False)
     help1.add_field(name="`help`", value="Sends this command list.", inline=False)
     
     help2 = Embed(
