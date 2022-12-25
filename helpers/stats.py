@@ -40,7 +40,8 @@ def get_stats_embed(tag: str) -> discord.Embed:
       'donations': data['donations'],
       'donations_received': data['donationsReceived'],
       'trophies': data['trophies'],
-      'war_stars': data['warStars']
+      'war_stars': data['warStars'],
+      'clan_capital_contrib': data['clanCapitalContributions']
     }
     embed = set_stats_embed(embed_data) 
     return embed
@@ -63,6 +64,11 @@ def set_stats_embed(embed_data: dict[str]) -> discord.Embed:
     embed_var.add_field(
         name="Donation Ratio 🤲",
         value=donation_ratio,
+        inline=False
+    )
+    embed_var.add_field(
+        name="Clan Capital Contributions 🛡️",
+        value=embed_data['clan_capital_contrib'],
         inline=False
     )
     embed_var.add_field(

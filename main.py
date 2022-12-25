@@ -8,7 +8,7 @@ from loguru import logger
 from discord.embeds import Embed
 from discord.errors import HTTPException
 from discord.ext import commands
-from discord import Client, Intents, Embed
+from discord import Intents, Embed
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_option
 
@@ -409,7 +409,7 @@ async def _hero(ctx):
         )
     ]
 )
-async def _clan(ctx, clan_tag: str=''):
+async def _clan(ctx: SlashContext, clan_tag: str=''):
     logger.info('clan')
     author_id = str(ctx.author.id)
     selector = {'_id': author_id}
